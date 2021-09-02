@@ -1,0 +1,62 @@
+{% extends 'admin/base.html'%}
+{% load static%}
+{% load crispy_forms_tags %}
+{% load filters %}
+{% block content%}
+    <section class="content-header">
+    <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Редактирование страницы</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="#">Главная</a></li>
+                  <li class="breadcrumb-item active">Редактирование страницы</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+
+     <section class="content">
+
+        <div class="row">
+            <div class="col-xs-12 col-12 mt-2">
+                <div class="card">
+                    <div class="card-header with-border">
+                        <h3 class="card-title">Редактирование страницы "о нас"</h3>
+                        <div class="card-tools">
+                            <a href="/admin/website/update-seo-files" class="btn btn-default btn-sm updateSeoFiles">
+                            <span class="hidden-xs">Обновить robots и sitemap</span><i class="fa fa-refresh visible-xs" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form id="w0" action="" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row site-main-slider">
+                                {{ formset.management_form }}
+                                {% for form in formset %}
+                                    <div class="col-md-4">
+                                    <h4>Услуга {{ form.prefix|to_int }}</h4>
+                                    <img src="{% if form.image.value.url %}{{ MEDIA_URL }}{{ form.image.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" alt="" class="img-responsive mb-0">
+                                    <div class="form-group formset_id">
+                                        {{ form.id }}
+                                    </div>
+                                    <div class="form-group margin-bottom-0 field-websitehomeslide-0-imagefile">
+                                        <label class="control-label" for="websitehomeslide-0-imagefile">Рекомендуемый размер: (1920x800)</label>
+                                        {{ form.image }}
+                                    </div>
+                                    {{ form.name|as_crispy_field }}
+                                    {{ form.description|as_crispy_field }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </section>
+{% endblock %}
