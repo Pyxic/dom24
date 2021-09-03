@@ -4,8 +4,8 @@ from django.forms import inlineformset_factory, modelformset_factory, ModelForm
 from django.shortcuts import redirect
 
 from admin.forms import MainConfForm, AboutUsConfForm, ServicePageConfForm, ContactPageConfForm, GalleryForm, \
-    SeoCreateForm, CustomerServiceForm
-from admin.models import MainPage, AboutUs, ServicePage, ContactPage, Gallery, SeoText, CustomerService
+    SeoCreateForm, CustomerServiceForm, DocumentForm
+from admin.models import MainPage, AboutUs, ServicePage, ContactPage, Gallery, SeoText, CustomerService, Document
 from abc import ABC, abstractmethod
 
 from admin.singleton import SingletonModel
@@ -43,7 +43,6 @@ class SingletonData(ABC):
             seo_form = SeoCreateForm(post, prefix="seo", instance=SeoText.objects.get(id=self.page.seo_id))
         else:
             seo_form = SeoCreateForm(post, prefix="seo")
-        print(formset.errors)
         if form.is_valid() and seo_form.is_valid() and formset.is_valid():
             seo_instance = seo_form.save()
             created_page = form.save(commit=False)
@@ -112,13 +111,33 @@ class AboutUsData(SingletonData):
         self.form = self.form_model(instance=self.page)
         self.model_formset = generic_inlineformset_factory(Gallery, form=GalleryForm, extra=self.extra)
         self.formset = self.model_formset(instance=self.page)
+        self.doc_model_formset = modelformset_factory(Document, form=DocumentForm, extra=0)
+        self.doc_formset = self.doc_model_formset(prefix='doc')
 
     def get_content(self):
         return {
             "form": self.form,
             "seo_form": self.seo_form,
             "formset": self.formset,
+            "doc_formset": self.doc_formset,
         }
+
+    def save_data(self, post, files):
+        form = self.form_model(post, files, instance=self.page)
+        formset = self.model_formset(post, files,
+                                     instance=self.page)
+        doc_formset = self.doc_model_formset(post, files, prefix='doc')
+        if SeoText.objects.filter(id=self.page.seo_id).exists():
+            seo_form = SeoCreateForm(post, prefix="seo", instance=SeoText.objects.get(id=self.page.seo_id))
+        else:
+            seo_form = SeoCreateForm(post, prefix="seo")
+        if form.is_valid() and seo_form.is_valid() and formset.is_valid() and doc_formset.is_valid():
+            seo_instance = seo_form.save()
+            created_page = form.save(commit=False)
+            created_page.seo_id = seo_instance.id
+            created_page.save()
+            formset.save()
+            doc_formset.save()
 
 
 class ServiceData(SingletonData):
@@ -144,7 +163,6 @@ class ServiceData(SingletonData):
             seo_form = SeoCreateForm(post, prefix="seo", instance=SeoText.objects.get(id=self.page.seo_id))
         else:
             seo_form = SeoCreateForm(post, prefix="seo")
-        print(formset.errors)
         if seo_form.is_valid() and formset.is_valid():
             seo_instance = seo_form.save()
             self.page.seo_id = seo_instance.id

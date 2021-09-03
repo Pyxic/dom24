@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.forms',
     'admin.apps.AdminConfig',
+    'account.apps.AccountConfig',
     'crispy_forms',
 ]
 
@@ -139,3 +141,5 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'

@@ -60,7 +60,7 @@
                                     <div class="col-xs-4 col-sm-2 text-center">
                                     <img src="{{ form.image.value.url }}" alt="" class="margin-bottom-15 img-thumbnail">
                                     <div class="form-group margin-bottom-15">
-                                        <a href="" data-confirm="Удалить?" title="Удалить"><i class="fa fa-trash text-red" aria-hidden="true"></i></a>
+                                        <a href="{% url 'admin:delete_image' form.id.value %}" data-confirm="Удалить?" title="Удалить"><i class="fa fa-trash text-red" aria-hidden="true"></i></a>
                                     </div>
                                     <div class="form-group formset_id">
                                         {{ form.id }}
@@ -87,7 +87,7 @@
                                     <div class="col-xs-4 col-sm-2 text-center">
                                     <img src="{{ form.image.value.url }}" alt="" class="margin-bottom-15 img-thumbnail">
                                     <div class="form-group margin-bottom-15">
-                                        <a href="" data-confirm="Удалить?" title="Удалить"><i class="fa fa-trash text-red" aria-hidden="true"></i></a>
+                                        <a class="delete_from_gallery" href="{% url 'admin:delete_image' form.id.value %}" data-confirm="Удалить?" title="Удалить"><i class="fa fa-trash text-red" aria-hidden="true"></i></a>
                                     </div>
                                     <div class="form-group formset_id">
                                         {{ form.id }}
@@ -104,12 +104,40 @@
                                 </div>
                             </div>
                             <div class="row site-about-documents">
-                                <div class="col-xs-12 col-sm-12">
+                                <div class="col-xs-12 col-md-12">
                                     <h3 class="page-header">Документы</h3>
                                 </div>
                                 <div class="col-xs-12 col-md-6">
                                     <div id="form-websitedocument-rows">
-
+                                        {{ doc_formset.management_form }}
+                                {% for form in doc_formset %}
+                                    <div class="doc-formset-item">
+                                <div class="form-group">
+                                    <a href="{% url 'admin:delete_document' form.id.value %}" class="float-right text-red delete_document" data-confirm="Удалить?"><i class="fa fa-trash"></i></a>
+                                    <i class="far fa-file-pdf fa-3x float-left" style="width: 32px; margin-right: 10px;" aria-hidden="true"></i>
+                                    <label>PDF, JPG (макс. размер 20 Mb)</label><br>
+                                    {{ form.file }}
+                                </div>
+                                    {{ form.name|as_crispy_field }}
+                                    <div class="form-group formset_id">
+                                        {{ form.id }}
+                                    </div>
+                                    </div>
+                                {% endfor %}
+                                    <div class="empty-form-formset">
+                                        <div class="doc-formset-item">
+                                <div class="form-group">
+                                    <a href="" class="float-right text-red" data-confirm="Удалить?"><i class="fa fa-trash"></i></a>
+                                    <i class="far fa-file-pdf fa-3x float-left" style="width: 32px; margin-right: 10px;" aria-hidden="true"></i>
+                                    <label>PDF, JPG (макс. размер 20 Mb)</label><br>
+                                    {{ doc_formset.empty_form.file }}
+                                </div>
+                                    {{ doc_formset.empty_form.name|as_crispy_field }}
+                                            <div class="form-group formset_id">
+                                        {{ doc_formset.empty_form.id }}
+                                    </div>
+                                    </div>
+                                    </div>
                                     </div>
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-success margin-bottom-15 form-row-add-websitedocument-btn">
@@ -163,6 +191,61 @@
         $('.main-empty input[type="file"], .additional-empty input[type="file"]').on('change', function (){
             console.log($(this));
             new_form($(this).parent());
+        });
+
+        let new_doc_form = function (){
+            let total_forms = $('#id_doc-TOTAL_FORMS').val();
+            $('#id_doc-TOTAL_FORMS').val(parseInt(total_forms)+1);
+            let new_form = $(".empty-form-formset .doc-formset-item").first().clone();
+            let new_form_id = new_form.find('#id_doc-__prefix__-id');
+            new_form_id.attr('name', new_form_id.attr('name').replace('__prefix__', total_forms));
+            new_form_id.attr('id', new_form_id.attr('id').replace('__prefix__', total_forms));
+            let new_form_image = new_form.find('#id_doc-__prefix__-file');
+            new_form_image.attr('name', new_form_image.attr('name').replace('__prefix__', total_forms));
+            new_form_image.attr('id', new_form_image.attr('id').replace('__prefix__', total_forms));
+            let new_form_name = new_form.find('#id_doc-__prefix__-name');
+            new_form_name.attr('name', new_form_name.attr('name').replace('__prefix__', total_forms));
+            new_form_name.attr('id', new_form_name.attr('id').replace('__prefix__', total_forms));
+            $('#form-websitedocument-rows').append(new_form);
+        }
+        $('.form-row-add-websitedocument-btn').on('click', function (e){
+            e.preventDefault();
+            new_doc_form();
+        });
+        $('.delete_from_gallery').on('click', function (e){
+            e.preventDefault();
+            let url = $(this).attr('href');
+            $.ajax({
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                type: "GET",
+                url: url,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                    console.log(response);
+                    location.reload();
+                }
+            });
+        });
+
+        $('.delete_document').on('click', function (e){
+            e.preventDefault();
+            let url = $(this).attr('href');
+            let confirm1 = confirm('Вы уверены что хотите удалить этот документ?');
+            if (confirm1==false){
+                return
+            }
+            $.ajax({
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                type: "GET",
+                url: url,
+                processData: false,
+                contentType: false,
+                success: function(response){
+                    console.log(response);
+                    location.reload();
+                }
+            });
         });
     </script>
 {% endblock %}

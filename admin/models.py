@@ -36,8 +36,12 @@ class AboutUs(SingletonModel):
 
 
 class Document(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField("Название", max_length=30)
     file = models.FileField(upload_to='documents/%Y/%m/%d')
+
+    def delete(self, *args, **kwargs):
+        self.file.delete(save=False)
+        super().delete(*args, **kwargs)
 
 
 class ServicePage(SingletonModel):
@@ -74,6 +78,10 @@ class Gallery(models.Model):
 
     def __str__(self):
         return f"Изображения для {self.content_object}"
+
+    def delete(self, *args, **kwargs):
+        self.image.delete(save=False)
+        super().delete(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Галерея'
