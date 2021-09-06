@@ -71,3 +71,19 @@
         </div>
     </section>
 {% endblock %}
+{% block script %}
+    <script>
+        $('#id_description').summernote({
+            minHeight: 220,
+             lang:'ru-RU',
+  styleTags: [
+    'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+	],
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph']],
+            ]
+  });
+    </script>
+{% endblock %}

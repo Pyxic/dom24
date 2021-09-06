@@ -4,8 +4,9 @@ from django.forms import inlineformset_factory, modelformset_factory, ModelForm
 from django.shortcuts import redirect
 
 from admin.forms import MainConfForm, AboutUsConfForm, ServicePageConfForm, ContactPageConfForm, GalleryForm, \
-    SeoCreateForm, CustomerServiceForm, DocumentForm
-from admin.models import MainPage, AboutUs, ServicePage, ContactPage, Gallery, SeoText, CustomerService, Document
+    SeoCreateForm, CustomerServiceForm, DocumentForm, NearBlockForm
+from admin.models import MainPage, AboutUs, ServicePage, ContactPage, Gallery, SeoText, CustomerService, Document, \
+    NearBlock
 from abc import ABC, abstractmethod
 
 from admin.singleton import SingletonModel
@@ -72,6 +73,8 @@ class MainPageData(SingletonData):
         self.form = self.form_model(instance=self.page)
         self.model_formset = generic_inlineformset_factory(Gallery, form=GalleryForm, extra=self.extra, max_num=3)
         self.formset = self.model_formset(instance=self.page)
+        self.near_model_formset = modelformset_factory(NearBlock, form=NearBlockForm, extra=0)
+        self.near_formset = self.near_model_formset(prefix='near')
 
     def is_instance(self):
         if self.model.objects.all().count() == 1:
@@ -86,7 +89,25 @@ class MainPageData(SingletonData):
             "form": self.form,
             "seo_form": self.seo_form,
             "formset": self.formset,
+            "near_formset": self.near_formset,
         }
+
+    def save_data(self, post, files):
+        form = self.form_model(post, files, instance=self.page)
+        formset = self.model_formset(post, files,
+                                     instance=self.page)
+        near_formset = self.near_model_formset(post)
+        if SeoText.objects.filter(id=self.page.seo_id).exists():
+            seo_form = SeoCreateForm(post, prefix="seo", instance=SeoText.objects.get(id=self.page.seo_id))
+        else:
+            seo_form = SeoCreateForm(post, prefix="seo")
+        if form.is_valid() and seo_form.is_valid() and formset.is_valid() and near_formset.is_valid():
+            seo_instance = seo_form.save()
+            created_page = form.save(commit=False)
+            created_page.seo_id = seo_instance.id
+            created_page.save()
+            formset.save()
+            near_formset.save()
 
 
 class AboutUsData(SingletonData):

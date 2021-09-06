@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.forms',
     'admin.apps.AdminConfig',
     'account.apps.AccountConfig',
+    'main.apps.MainConfig',
     'crispy_forms',
 ]
 
@@ -143,3 +144,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'account.authentication.EmailAuthBackend',
+]

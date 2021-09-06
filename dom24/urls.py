@@ -21,6 +21,8 @@ from dom24 import settings
 
 urlpatterns = [
     path('admin/', include(('admin.urls', 'admin'), namespace='admin')),
+    path('account/', include(('account.urls', 'account'), namespace='account')),
+    path('', include(('main.urls', 'main'), namespace='main')),
 ]
 
 if settings.DEBUG:

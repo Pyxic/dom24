@@ -61,6 +61,23 @@
                                 {% endfor %}
                                 </div>
                              <div class="col-md-12">
+                                 <h3 class="page-header">Рядом с нами</h3>
+                                 <div class="near-block row">
+                                     {{ near_formset.management_form }}
+                                     {% for form in near_formset %}
+                                         <div class="col-md-4">
+                                             <h4>Блок </h4>
+                                             <img src="{{ form.image.value.url }}" alt="" class="img-responsive margin-bottom-15">
+                                             {{ form.title|as_crispy_field }}
+                                             {{ form.description|as_crispy_field }}
+                                         <div class="formset_id">
+                                                {{ form.id }}
+                                            </div>
+                                         </div>
+                                     {% endfor %}
+                                 </div>
+                             </div>
+                             <div class="col-md-12">
                                 <h3 class="page-header">Настройки SEO</h3>
                                 {% for field in seo_form %}
                                 <div>
@@ -79,4 +96,19 @@
         </div>
     </section>
 
+{% endblock %}
+{% block script %}
+    <script>
+        $('#id_description').summernote({
+             lang:'ru-RU',
+  styleTags: [
+    'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+	],
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph']],
+            ]
+  });
+    </script>
 {% endblock %}

@@ -116,5 +116,19 @@
             e.preventDefault();
             new_form();
         });
+
+        $('.col-md-4 textarea').summernote({
+            minHeight: 200,
+            maxHeight: 200,
+             lang:'ru-RU',
+          styleTags: [
+            'p', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+            ],
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['para', ['ul', 'ol', 'paragraph']],
+            ]
+  });
     </script>
 {% endblock %}

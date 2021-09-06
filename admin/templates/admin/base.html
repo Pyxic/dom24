@@ -15,6 +15,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css'%}">
   <link rel="stylesheet" href="{% static 'dist/css/admin.css'%}">
+    <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css'%}">
     <!-- JQVMap -->
     <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css'%}">
   <style>
@@ -218,7 +219,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="" class="nav-link">
+                <a href="{% url 'admin:edit_services'%}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Услуги</p>
                 </a>
@@ -282,6 +283,8 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{% static 'dist/js/pages/dashboard3.js'%}"></script>
 <script src="{% static 'dist/js/custom.js'%}"></script>
+<script src="{% static 'plugins/summernote/summernote-bs4.min.js'%}"></script>
+<script src="{% static 'plugins/summernote/lang/summernote-ru-RU.js'%}"></script>
 {% block script %}
 {% endblock %}
 </body>

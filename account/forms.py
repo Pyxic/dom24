@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
-from django.forms import forms
+from django import forms
 
 
 class LoginForm(forms.ModelForm):
 
-    password = forms.CharField(widget=forms.PasswordInput)
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
 
     def __init__(self,  *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,4 +24,9 @@ class LoginForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['username', 'password']
+        fields = ['email', 'password']
+        widgets = {
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'E-mail или ID'
+            })
+        }

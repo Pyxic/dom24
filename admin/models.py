@@ -86,3 +86,18 @@ class Gallery(models.Model):
     class Meta:
         verbose_name = 'Галерея'
         verbose_name_plural = 'Галереи'
+
+
+class Unit(models.Model):
+    name = models.CharField("Ед. изм.", max_length=20)
+
+
+class Service(models.Model):
+    """Модель хранит коммунальные услуги"""
+
+    name = models.CharField("Услуга", max_length=50)
+    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True)
+    show = models.BooleanField("Показывать в счетчиках")
+
+    def __str__(self):
+        return self.name

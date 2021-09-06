@@ -8,6 +8,7 @@ from django.views.generic import DeleteView
 
 from admin.forms import SeoCreateForm, GalleryForm
 from admin.models import SeoText, Gallery, Document
+from admin.services.services import UnitData
 from admin.services.singleton_pages import get_singleton_page_data
 
 
@@ -26,6 +27,13 @@ def singleton_page(request, page_name):
 def delete_from_gallery(request, image_id):
     Gallery.objects.get(id=image_id).delete()
     return JsonResponse({'image_id': image_id})
+
+
+def edit_services(request):
+    unit_formset = UnitData.get_formset()
+    return render(request, 'admin/settings/services.html',{
+        "unit_formset": unit_formset,
+    })
 
 
 def delete_document(request, pk):

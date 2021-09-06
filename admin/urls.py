@@ -10,4 +10,5 @@ urlpatterns = [
     path('singleton_page/<str:page_name>', views.singleton_page, name='contact_page'),
     path('delete_image_gallery/<int:image_id>', views.delete_from_gallery, name='delete_image'),
     path('delete_document/<int:pk>', views.delete_document, name='delete_document'),
+    path('edit_services', views.edit_services, name='edit_services'),
 ]

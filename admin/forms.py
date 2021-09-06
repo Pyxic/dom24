@@ -1,7 +1,8 @@
 from django import forms
 from django.forms import TextInput
 
-from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document
+from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
+    NearBlock, Unit
 
 from django.forms.widgets import ClearableFileInput
 
@@ -77,3 +78,15 @@ class CustomerServiceForm(forms.ModelForm):
         widgets = {
             'image': CustomClearableFileInput
         }
+
+
+class NearBlockForm(forms.ModelForm):
+    class Meta:
+        model = NearBlock
+        fields = '__all__'
+
+
+class UnitForm(forms.ModelForm):
+    class Meta:
+        model = Unit
+        fields = '__all__'
