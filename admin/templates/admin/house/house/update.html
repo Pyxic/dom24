@@ -1,0 +1,55 @@
+{% extends 'admin/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Новый дом</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item"><a href="{% url 'admin:house_list' %}">Дома</a></li>
+                    <li class="breadcrumb-item active">Новый дом</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+
+    <section class="content">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xs-12 col-lg-4">
+                            {{ form|crispy }}
+                        </div>
+    <div class="col-xs-12 col-lg-8">
+        <div class="row">
+            <div class="col-xs-12 col-md-6">
+                <img src="{% if form.image1.value.url %}{{ MEDIA_URL }}{{ form.image1.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" class="img-responsive largeImg margin-bottom-30" alt="Изображение #1. Размер: (522x350)">
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <img src="{% if form.imag2.value.url %}{{ MEDIA_URL }}{{ form.imag2.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" class="img-responsive smallImg margin-bottom-30" alt="Изображение #2. Размер: (248x160)">
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <img src="{% if form.image3.value.url %}{{ MEDIA_URL }}{{ form.imag3.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" class="img-responsive smallImg margin-bottom-30" alt="Изображение #3. Размер: (248x160)">
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <img src="{% if form.image4.value.url %}{{ MEDIA_URL }}{{ form.image4.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" class="img-responsive smallImg margin-bottom-30" alt="Изображение #4. Размер: (248x160)">
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <img src="{% if form.image5.value.url %}{{ MEDIA_URL }}{{ form.image5.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" class="img-responsive smallImg margin-bottom-30" alt="Изображение #5. Размер: (248x160)">
+            </div>
+        </div>
+    </div>
+</div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

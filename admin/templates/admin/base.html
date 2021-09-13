@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="{% static 'plugins/summernote/summernote-bs4.min.css'%}">
     <!-- JQVMap -->
     <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css'%}">
+  <link rel="stylesheet" href="{% static 'plugins/datatables-bs4/css/dataTables.bootstrap4.min.css'%}">
+  <link rel="stylesheet" href="{% static 'plugins/datatables-responsive/css/responsive.bootstrap4.min.css'%}">
+  <link rel="stylesheet" href="{% static 'plugins/datatables-buttons/css/buttons.bootstrap4.min.css'%}">
   <style>
     /* .u-under {
       display: none;
@@ -63,7 +66,7 @@
     <ul class="navbar-nav ml-auto">
       <!-- Navbar Search -->
       <li class="nav-item">
-        <a class="nav-link" href="#" role="button">admin2</a>
+        <a class="nav-link" href="#" role="button">{{ request.user.first_name }} {{ request.user.last_name }}</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="logout_admin" role="button">выйти</a>
@@ -137,7 +140,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="pages/shares.html" class="nav-link">
+            <a href="{% url 'admin:house_list' %}" class="nav-link">
               <i class="nav-icon fas fa-columns"></i>
               <p>
                 Дома
@@ -225,31 +228,31 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="pages/singletonepages/about_cinema.html" class="nav-link">
+                <a href="{% url 'admin:tariff_list' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Тарифы</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="pages/singletonepages/cafe-bar.html" class="nav-link">
+                <a href="{% url 'admin:roles' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Роли</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="pages/singletonepages/vip-hall.html" class="nav-link">
+                <a href="{% url 'admin:user_list' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Пользователи</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="pages/singletonepages/ads.html" class="nav-link">
+                <a href="{% url 'admin:requisites' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Платежные реквизиты</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="pages/singletonepages/ads.html" class="nav-link">
+                <a href="{% url 'admin:payment_item_list' %}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Статьи платежей</p>
                 </a>
@@ -285,6 +288,15 @@
 <script src="{% static 'dist/js/custom.js'%}"></script>
 <script src="{% static 'plugins/summernote/summernote-bs4.min.js'%}"></script>
 <script src="{% static 'plugins/summernote/lang/summernote-ru-RU.js'%}"></script>
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js'%}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js'%}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js'%}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/dataTables.buttons.min.js'%}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.bootstrap4.min.js'%}"></script>
+    <script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js'%}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js'%}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js'%}"></script>
 {% block script %}
 {% endblock %}
 </body>

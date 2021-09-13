@@ -2,7 +2,7 @@ from django import forms
 from django.forms import TextInput
 
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
-    NearBlock, Unit
+    NearBlock, Unit, Service, Tariff, TariffService, Requisites
 
 from django.forms.widgets import ClearableFileInput
 
@@ -90,3 +90,45 @@ class UnitForm(forms.ModelForm):
     class Meta:
         model = Unit
         fields = '__all__'
+
+
+class ServiceForm(forms.ModelForm):
+    unit = forms.ModelChoiceField(
+        label='Едм. изм.',
+        queryset=Unit.objects.all(), empty_label='Выберите...', required=False)
+
+    class Meta:
+        model = Service
+        fields = '__all__'
+
+
+class TariffCreateForm(forms.ModelForm):
+
+    class Meta:
+        model = Tariff
+        fields = '__all__'
+
+
+class TariffServiceForm(forms.ModelForm):
+    unit = forms.ModelChoiceField(
+        label='Едм. изм.',
+        queryset=Unit.objects.all(), empty_label='Выберите...', disabled=True, required=False)
+
+    service = forms.ModelChoiceField(
+        label='Услуга',
+        queryset=Service.objects.all(), empty_label='Выберите...')
+
+    class Meta:
+        model = TariffService
+        fields = '__all__'
+        widgets = {
+            'currency': forms.TextInput(attrs={'readonly': 'readonly', 'value': 'грн'}),
+        }
+
+
+class RequisitesForm(forms.ModelForm):
+
+    class Meta:
+        model = Requisites
+        fields = '__all__'
+

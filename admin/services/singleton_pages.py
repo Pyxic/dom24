@@ -4,9 +4,9 @@ from django.forms import inlineformset_factory, modelformset_factory, ModelForm
 from django.shortcuts import redirect
 
 from admin.forms import MainConfForm, AboutUsConfForm, ServicePageConfForm, ContactPageConfForm, GalleryForm, \
-    SeoCreateForm, CustomerServiceForm, DocumentForm, NearBlockForm
+    SeoCreateForm, CustomerServiceForm, DocumentForm, NearBlockForm, RequisitesForm
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, Gallery, SeoText, CustomerService, Document, \
-    NearBlock
+    NearBlock, Requisites
 from abc import ABC, abstractmethod
 
 from admin.singleton import SingletonModel
@@ -16,7 +16,7 @@ def get_singleton_page_data(page_name: str) -> SingletonData:
     pages = {
         'main_page': MainPageData,
         'about_us_page': AboutUsData,
-        'service_page': ServiceData,
+        'service_page': ServicePageData,
         'contact_page': ContactData,
     }
     return pages[page_name]()
@@ -73,7 +73,7 @@ class MainPageData(SingletonData):
         self.form = self.form_model(instance=self.page)
         self.model_formset = generic_inlineformset_factory(Gallery, form=GalleryForm, extra=self.extra, max_num=3)
         self.formset = self.model_formset(instance=self.page)
-        self.near_model_formset = modelformset_factory(NearBlock, form=NearBlockForm, extra=0)
+        self.near_model_formset = modelformset_factory(NearBlock, form=NearBlockForm, extra=6, max_num=6)
         self.near_formset = self.near_model_formset(prefix='near')
 
     def is_instance(self):
@@ -161,7 +161,7 @@ class AboutUsData(SingletonData):
             doc_formset.save()
 
 
-class ServiceData(SingletonData):
+class ServicePageData(SingletonData):
     model = ServicePage
     form_model = ServicePageConfForm
     render_url = 'admin/pages/service.html'
@@ -230,3 +230,27 @@ class ContactData(SingletonData):
             "seo_form": self.seo_form,
             "form": self.form,
         }
+
+
+class RequisitesPageData(SingletonData):
+    model = Requisites
+    form_model = RequisitesForm
+    render_url = 'admin/settings/requisites.html'
+
+    def __init__(self):
+        if self.is_instance():
+            self.page = self.model.objects.first()
+        else:
+            self.page = self.model()
+        self.form = self.form_model(instance=self.page)
+
+    def save_data(self, post):
+        form = self.form_model(post, instance=self.page)
+        if form.is_valid():
+            form.save()
+
+    def get_content(self):
+        return {
+            "form": self.form,
+        }
+

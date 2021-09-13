@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 from admin.singleton import SingletonModel
@@ -91,13 +92,81 @@ class Gallery(models.Model):
 class Unit(models.Model):
     name = models.CharField("Ед. изм.", max_length=20)
 
+    def __str__(self):
+        return self.name
+
 
 class Service(models.Model):
     """Модель хранит коммунальные услуги"""
 
     name = models.CharField("Услуга", max_length=50)
-    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True)
+    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True)
     show = models.BooleanField("Показывать в счетчиках")
+
+    def __str__(self):
+        return self.name
+
+
+class Tariff(models.Model):
+    """Хранит тарифы для жителей"""
+
+    name = models.CharField("Название тарифа", max_length=100)
+    description = models.TextField("Описание тарифа")
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return self.name
+
+
+class TariffService(models.Model):
+    tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    price = models.DecimalField("Цена", max_digits=6, decimal_places=2)
+    currency = models.CharField("Валюта", default='грн', max_length=5)
+
+
+class Requisites(SingletonModel):
+    name = models.CharField("Название компании", max_length=150)
+    information = models.TextField("Информация")
+
+
+class PaymentItem(models.Model):
+    name = models.CharField("Название", max_length=150)
+
+    class Types(models.TextChoices):
+        expenses = 'расходы', _('расходы')
+        comings = 'приходы', _('приходы')
+
+    type = models.CharField("Приходы/Расходы", choices=Types.choices, max_length=30)
+
+
+class Section(models.Model):
+    name = models.CharField("Название", max_length=150)
+
+    def __str__(self):
+        return self.name
+
+
+class Level(models.Model):
+    name = models.CharField("Название", max_length=150)
+
+    def __str__(self):
+        return self.name
+
+
+class House(models.Model):
+    name = models.CharField("Название", max_length=150)
+    address = models.CharField("Адрес", max_length=150)
+    image1 = models.ImageField("Изображение #1. Размер: (522x350)", upload_to='house/', null=True, blank=True)
+    image2 = models.ImageField("Изображение #2. Размер: (248x160)", upload_to='house/', null=True, blank=True)
+    image3 = models.ImageField("Изображение #3. Размер: (248x160)", upload_to='house/', null=True, blank=True)
+    image4 = models.ImageField("Изображение #4. Размер: (248x160)", upload_to='house/', null=True, blank=True)
+    image5 = models.ImageField("Изображение #5. Размер: (248x160)", upload_to='house/', null=True, blank=True)
+    sections = models.ManyToManyField(Section)
+    levels = models.ManyToManyField(Level)
 
     def __str__(self):
         return self.name

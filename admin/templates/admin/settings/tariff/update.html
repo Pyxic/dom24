@@ -1,0 +1,140 @@
+{% extends 'admin/base.html'%}
+{% load crispy_forms_tags %}
+{% load filters %}
+{% block content %}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Тарифы</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item"><a href="{% url 'admin:tariff_list' %}">Тарифы</a></li>
+                    <li class="breadcrumb-item active">Новый Тариф</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+    <section class="content">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xs-12 col-md-7">
+                            {% for field in form %}
+                                {{ field|as_crispy_field }}
+                            {% endfor %}
+                        </div>
+                        <div class="col-xs-12 col-lg-7">
+                            <div id="form-tariffservice-rows">
+                                {{ formset.management_form }}
+                                {% for form in formset %}
+                                    <div class="row tariffservice-row">
+                                        {{ form.id }}
+                                        <div class="col-xs-6 col-md-4 row-service">
+                                            {{ form.service|as_crispy_field }}
+                                        </div>
+                                    <div class="col-xs-6 col-md-3">
+                                        {{ form.price|as_crispy_field }}
+                                    </div>
+                                    <div class="col-xs-6 col-md-2">
+                                        {{ form.currency|as_crispy_field }}
+                                    </div>
+                                    <div class="col-xs-6 col-md-3">
+                                        <div class="form-group">
+                                            <label>Ед. изм.</label>
+                                            <div class="input-group">
+                                                {{ form.unit|add_class:"form-select unit-select" }}
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default form-row-remove-btn"><i class="fa fa-trash"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        <div class="empty-form-formset">
+                            <div class="row tariffservice-row">
+                                    {{ formset.empty_form.id }}
+                                        <div class="col-xs-6 col-md-4 row-service">
+                                            {{ formset.empty_form.service|as_crispy_field }}
+                                        </div>
+                                    <div class="col-xs-6 col-md-3">
+                                        {{ formset.empty_form.price|as_crispy_field }}
+                                    </div>
+                                    <div class="col-xs-6 col-md-2">
+                                        {{ formset.empty_form.currency|as_crispy_field }}
+                                    </div>
+                                    <div class="col-xs-6 col-md-3">
+                                        <div class="form-group">
+                                            <label>Ед. изм.</label>
+                                            <div class="input-group">
+                                                {{ formset.empty_form.unit|add_class:"form-select unit-select" }}
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default form-row-remove-btn"><i class="fa fa-trash"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                            <button class="btn btn-default btn-hover-change float-left margin-bottom-15 form-row-add-tariffservice-btn">Добавить услугу</button>
+                        </div>
+                    </div>
+                    <div style="text-align: center;" class="p-5">
+                        <input type="reset" value="отмена" class="btn btn-default">
+                        <input type="submit" value="сохранить" class="btn btn-success">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script>
+        let new_form_service = function (){
+            let total_forms = $('#id_tariffservice_set-TOTAL_FORMS').val();
+            $('#id_tariffservice_set-TOTAL_FORMS').val(parseInt(total_forms)+1);
+            let new_form = $(".empty-form-formset .tariffservice-row").first().clone();
+            let new_form_id = new_form.find('#id_tariffservice_set-__prefix__-id');
+            new_form_id.attr('name', new_form_id.attr('name').replace('__prefix__', total_forms));
+            new_form_id.attr('id', new_form_id.attr('id').replace('__prefix__', total_forms));
+            let new_form_service = new_form.find('#id_tariffservice_set-__prefix__-service');
+            new_form_service.attr('name', new_form_service.attr('name').replace('__prefix__', total_forms));
+            new_form_service.attr('id', new_form_service.attr('id').replace('__prefix__', total_forms));
+            let new_form_price = new_form.find('#id_tariffservice_set-__prefix__-price');
+            new_form_price.attr('name', new_form_price.attr('name').replace('__prefix__', total_forms));
+            new_form_price.attr('id', new_form_price.attr('id').replace('__prefix__', total_forms));
+            let new_form_currency = new_form.find('#id_tariffservice_set-__prefix__-currency');
+            new_form_currency.attr('name', new_form_currency.attr('name').replace('__prefix__', total_forms));
+            new_form_currency.attr('id', new_form_currency.attr('id').replace('__prefix__', total_forms));
+            let new_form_unit = new_form.find('#id_tariffservice_set-__prefix__-unit');
+            new_form_unit.attr('name', new_form_unit.attr('name').replace('__prefix__', total_forms));
+            new_form_unit.attr('id', new_form_unit.attr('id').replace('__prefix__', total_forms));
+            $('#form-tariffservice-rows').append(new_form);
+        }
+        $('.form-row-add-tariffservice-btn').on('click', function (e){
+            e.preventDefault();
+            new_form_service();
+        });
+
+        $('#form-tariffservice-rows').on('change', '.row-service .select', function (){
+            let service = $(this);
+            $.ajax({
+                type: "GET",
+                url: '{% url 'admin:get_unit_by_service' %}',
+                data: {'id': service.val()},
+                 success: function(response) {
+                    $(service).parents('.tariffservice-row').find('.unit-select').val(response);
+                 }
+     })
+        })
+    </script>
+{% endblock %}

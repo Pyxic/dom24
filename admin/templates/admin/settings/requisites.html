@@ -1,0 +1,35 @@
+{% extends 'admin/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Реквизиты</h1>
+              </div>
+            </div>
+          </div>
+    </section>
+
+    <section class="content">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xs-12 col-lg-7">
+                            {{ form.name|as_crispy_field }}
+                            {{ form.information|as_crispy_field }}
+                        </div>
+                        <div class="col-xs-12 col-lg-7">
+                            <div class="float-right">
+                                <input type="reset" value="отмена" class="btn btn-default">
+                                <input type="submit" value="сохранить" class="btn btn-success">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
