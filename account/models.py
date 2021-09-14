@@ -23,3 +23,6 @@ class Profile(models.Model):
 
     role = models.CharField("Роль", choices=Role.choices, max_length=20, default='директор')
     status = models.CharField("Статус", choices=Status.choices, max_length=20, default='новый')
+
+    def __str__(self):
+        return self.user.first_name + ' ' + self.user.last_name

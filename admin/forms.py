@@ -1,8 +1,9 @@
 from django import forms
 from django.forms import TextInput
 
+from account.models import Profile
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
-    NearBlock, Unit, Service, Tariff, TariffService, Requisites
+    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level
 
 from django.forms.widgets import ClearableFileInput
 
@@ -132,3 +133,34 @@ class RequisitesForm(forms.ModelForm):
         model = Requisites
         fields = '__all__'
 
+
+class HouseCreateForm(forms.ModelForm):
+
+    class Meta:
+        model = House
+        exclude = ['users']
+
+
+class SectionForm(forms.ModelForm):
+
+    class Meta:
+        model = Section
+        exclude = ['house']
+
+
+class LevelForm(forms.ModelForm):
+
+    class Meta:
+        model = Level
+        exclude = ['house']
+
+
+class HouseUserForm(forms.ModelForm):
+    profile = forms.ModelChoiceField(
+        label='ФИО',
+        queryset=Profile.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = House.users.through
+        fields = ['profile']

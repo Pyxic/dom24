@@ -6,4 +6,5 @@ from account.views import LoginView
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
+    path('get_user_role', views.get_user_role, name='get_user_role'),
     ]

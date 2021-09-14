@@ -1,9 +1,11 @@
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
+from account.models import Profile
 from admin.singleton import SingletonModel
 
 
@@ -143,20 +145,6 @@ class PaymentItem(models.Model):
     type = models.CharField("Приходы/Расходы", choices=Types.choices, max_length=30)
 
 
-class Section(models.Model):
-    name = models.CharField("Название", max_length=150)
-
-    def __str__(self):
-        return self.name
-
-
-class Level(models.Model):
-    name = models.CharField("Название", max_length=150)
-
-    def __str__(self):
-        return self.name
-
-
 class House(models.Model):
     name = models.CharField("Название", max_length=150)
     address = models.CharField("Адрес", max_length=150)
@@ -165,8 +153,27 @@ class House(models.Model):
     image3 = models.ImageField("Изображение #3. Размер: (248x160)", upload_to='house/', null=True, blank=True)
     image4 = models.ImageField("Изображение #4. Размер: (248x160)", upload_to='house/', null=True, blank=True)
     image5 = models.ImageField("Изображение #5. Размер: (248x160)", upload_to='house/', null=True, blank=True)
-    sections = models.ManyToManyField(Section)
-    levels = models.ManyToManyField(Level)
+    users = models.ManyToManyField(Profile)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('admin:detail_house',
+                       args=[self.id])
+
+
+class Section(models.Model):
+    name = models.CharField("Название", max_length=150)
+    house = models.ForeignKey(House, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class Level(models.Model):
+    name = models.CharField("Название", max_length=150)
+    house = models.ForeignKey(House, on_delete=models.CASCADE, related_name='house_level')
 
     def __str__(self):
         return self.name

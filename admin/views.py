@@ -8,12 +8,13 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.dateparse import postgres_interval_re
 from django.views.decorators.http import require_POST
-from django.views.generic import DeleteView, ListView, CreateView, UpdateView
+from django.views.generic import DeleteView, ListView, CreateView, UpdateView, DetailView
 
 from account.forms import UserChangeForm, ProfileChangeForm
 from account.models import Profile
 from admin.forms import SeoCreateForm, GalleryForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House
+from admin.services.house import HouseData
 from admin.services.services import UnitData, ServiceData, TariffData
 from admin.services.singleton_pages import get_singleton_page_data, RequisitesPageData
 
@@ -182,13 +183,27 @@ class HouseList(ListView):
     template_name = 'admin/house/house/index.html'
 
 
+class HouseDetail(DetailView):
+    model = House
+    template_name = 'admin/house/house/detail.html'
+
+
 def update_house(request, house_id=None):
     house = HouseData(house_id)
     form = house.get_form(instance=True)
-    #formset = tariff.get_formset()
+    section_formset = house.get_section_formset()
+    level_formset = house.get_level_formset()
+    user_formset = house.get_user_formset()
     if request.method == 'POST':
-        if house.save_data(request.POST) is True:
-            return redirect("admin:tariff_list")
-    return render(request, 'admin/settings/tariff/update.html',
+        if house.save_data(request.POST, request.FILES) is True:
+            return redirect("admin:house_list")
+    return render(request, 'admin/house/house/update.html',
                   {"form": form,
-                   })
+                   "section_formset": section_formset,
+                   "level_formset": level_formset,
+                   "user_formset": user_formset})
+
+
+def delete_house(request, house_id):
+    House.objects.get(id=house_id).delete()
+    return redirect('admin:house_list')

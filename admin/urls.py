@@ -29,4 +29,8 @@ urlpatterns = [
     path('update_payment_item/<int:pk>', views.PaymentItemUpdateView.as_view(), name='update_payment_item'),
     path('delete_payment_item/<int:payment_item_id>', views.delete_payment_item, name='delete_payment_item'),
     path('house_list', views.HouseList.as_view(), name='house_list'),
+    path('create_house', views.update_house, name='create_house'),
+    path('update_house/<int:house_id>', views.update_house, name='update_house'),
+    path('delete_house/<int:house_id>', views.delete_house, name='delete_house'),
+    path('detail_house/<int:pk>/', views.HouseDetail.as_view(), name='detail_house'),
 ]

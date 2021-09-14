@@ -20,7 +20,7 @@
         <div class="row">
             <div class="col-xs-12 col-md-12">
                 <div class="float-right mb-2 mt-2">
-                    <a href="" class="btn btn-success">Добавить дом</a>
+                    <a href="{% url 'admin:create_house' %}" class="btn btn-success">Добавить дом</a>
                 </div>
             </div>
         </div>
@@ -44,15 +44,17 @@
                             </thead>
                             <tbody>
                                 {% for house in house_list %}
-                                    <td>{{ house.id }}</td>
+                                    <tr class="clickable-row" href="{% url 'admin:detail_house' house.id %}">
+                                        <td>{{ house.id }}</td>
                                     <td>{{ house.name }}</td>
                                     <td>{{ house.address }}</td>
                                     <td>
                                     <div class="btn-group float-right">
-                                                <a class="btn btn-default btn-sm" href="" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
-                                                <a class="btn btn-default btn-sm" href="" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
+                                                <a class="btn btn-default btn-sm" href="{% url 'admin:update_house' house.id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
+                                                <a class="btn btn-default btn-sm" href="{% url 'admin:delete_house' house.id %}" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
                                             </div>
                                     </td>
+                                    </tr>
                                 {% endfor %}
                             </tbody>
                         </table>

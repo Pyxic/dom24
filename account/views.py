@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate, login
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
 from django.views import View
 
 from account.forms import LoginForm
+from account.models import Profile
 
 
 class LoginView(View):
@@ -25,3 +26,10 @@ class LoginView(View):
                 login(request, user)
                 return HttpResponseRedirect('/admin')
         return render(request, 'account/login.html', {'form': form})
+
+
+def get_user_role(request):
+    if request.is_ajax():
+        print(request.POST.get('pk'))
+        user = Profile.objects.get(pk=request.POST.get('pk'))
+        return HttpResponse(user.role)
