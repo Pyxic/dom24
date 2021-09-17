@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
-from account.models import Profile
+from account.models import Profile, Owner
 from admin.singleton import SingletonModel
 
 
@@ -177,3 +177,17 @@ class Level(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Flat(models.Model):
+    number = models.DecimalField("Номер квартиры", decimal_places=0, max_digits=6)
+    area = models.FloatField("Площадь (кв.м.)")
+    house = models.ForeignKey(House, on_delete=models.CASCADE, verbose_name='Дом')
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, verbose_name="Секция", null=True, blank=True)
+    level = models.ForeignKey(Level, on_delete=models.SET_NULL, verbose_name="Этаж", null=True, blank=True)
+    owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, verbose_name='Владелец', null=True, blank=True)
+    tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, verbose_name="Тариф", null=True)
+    bank_book = models.IntegerField("Лицевой счет", null=True, blank=True)
+
+    def balance(self):
+        return 'нет счета'

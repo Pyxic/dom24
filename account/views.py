@@ -30,6 +30,5 @@ class LoginView(View):
 
 def get_user_role(request):
     if request.is_ajax():
-        print(request.POST.get('pk'))
         user = Profile.objects.get(pk=request.POST.get('pk'))
         return HttpResponse(user.role)

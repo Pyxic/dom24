@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.forms import generic_inlineformset_factory
 from django.forms import modelformset_factory
@@ -9,12 +11,16 @@ from django.urls import reverse_lazy
 from django.utils.dateparse import postgres_interval_re
 from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, ListView, CreateView, UpdateView, DetailView
+from django.views.generic.edit import FormMixin
 
 from account.forms import UserChangeForm, ProfileChangeForm
-from account.models import Profile
-from admin.forms import SeoCreateForm, GalleryForm
-from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House
+from account.models import Profile, Owner
+from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm
+from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
+    Section, Level
+from admin.services.flat import FlatData
 from admin.services.house import HouseData
+from admin.services.owner import OwnerData
 from admin.services.services import UnitData, ServiceData, TariffData
 from admin.services.singleton_pages import get_singleton_page_data, RequisitesPageData
 
@@ -127,9 +133,8 @@ def update_user(request, user_id=None):
         if register_form.is_valid() and profile_form.is_valid():
             updated_user = register_form.save(commit=False)
             if 'password' in register_form.changed_data:
-                print('yes')
                 updated_user.set_password(register_form.cleaned_data['password'])
-                updated_user.save()
+            updated_user.save()
             updated_profile = profile_form.save(commit=False)
             updated_profile.user_id = updated_user.id
             updated_profile.save()
@@ -207,3 +212,86 @@ def update_house(request, house_id=None):
 def delete_house(request, house_id):
     House.objects.get(id=house_id).delete()
     return redirect('admin:house_list')
+
+
+def delete_section(request, pk):
+    Section.objects.get(pk=pk).delete()
+    return JsonResponse({'pk': pk})
+
+
+def delete_level(request, pk):
+    Level.objects.get(pk=pk).delete()
+    return JsonResponse({'pk': pk})
+
+
+def delete_house_user(request, pk):
+    house_user = House.users.through.objects.filter(pk=pk).delete()
+    return JsonResponse({'pk': pk})
+
+
+class FlatList(FormMixin, ListView):
+    model = Flat
+    template_name = 'admin/flat/index.html'
+    form_class = FlatFilterForm
+
+
+class FlatDetail(DetailView):
+    model = Flat
+    template_name = 'admin/flat/detail.html'
+
+
+def update_flat(request, flat_id=None):
+    flat = FlatData(flat_id)
+    form = flat.get_form(instance=True)
+    if request.method == 'POST':
+        form = flat.get_form(instance=True, post=request.POST)
+        if flat.save_data(request.POST) is True:
+            if 'save-action-add' in request.POST:
+                return redirect('admin:create_flat')
+            else:
+                return redirect("admin:flat_list")
+    return render(request, 'admin/flat/update.html',
+                  {"form": form,
+                   "update": True if flat_id is not None else False})
+
+
+def delete_flat(request, pk):
+    Flat.objects.get(pk=pk).delete()
+    return redirect('admin:flat_list')
+
+
+def get_section_level(request):
+    if request.is_ajax():
+        house = request.GET.get('house')
+        sections = Section.objects.filter(house_id=house).values('name', 'id')
+        levels = Level.objects.filter(house_id=house).values('name', 'id')
+        return JsonResponse(json.dumps({'sections': list(sections), 'levels': list(levels)}), safe=False)
+
+
+class OwnerList(ListView):
+    model = Owner
+    template_name = 'admin/owner/index.html'
+
+
+class OwnerDetail(DetailView):
+    model = Owner
+    template_name = 'admin/owner/detail.html'
+
+
+def update_owner(request, owner_id=None):
+    owner = OwnerData(owner_id)
+    user_form = owner.get_user_form(instance=True)
+    owner_form = owner.get_owner_form(instance=True)
+    if request.method == 'POST':
+        user_form = owner.get_user_form(instance=True, post=request.POST)
+        owner_form = owner.get_owner_form(instance=True, post=request.POST)
+        if owner.save_data(request.POST, request.FILES) is True:
+            return redirect("admin:owner_list")
+    return render(request, 'admin/owner/update.html',
+                  {"user_form": user_form,
+                   "owner_form": owner_form})
+
+
+def delete_owner(request, user_id):
+    Owner.objects.get(user_id=user_id).delete()
+    return redirect('admin:owner_list')

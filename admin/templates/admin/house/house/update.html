@@ -78,12 +78,12 @@
                                               {% for form in section_formset %}
                                               <div class="section-item">
                                                   {{ form.id }}
-                                                <div class="form-group">
+                                                <div class="form-group formset-item">
                                                     <label>{{ form.name.label }}</label>
                                                     <div class="input-group">
                                                         {{ form.name|add_class:"form-control" }}
                                                         <span class="input-group-btn">
-                                                            <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>
+                                                            <a href="" class="btn btn-danger form-row-remove-btn"><div class="delete-block" style="display: none">{{ form.DELETE }}</div><i class="fa fa-trash"></i></a>
                                                         </span>
                                                     </div>
                                                     <div class="form-error">
@@ -99,12 +99,12 @@
                                             <div class="empty-form-formset">
                                                 <div class="section-item">
                                                   {{ section_formset.empty_form.id }}
-                                                <div class="form-group">
+                                                <div class="form-group formset-item">
                                                     <label>{{ section_formset.empty_form.name.label }}</label>
                                                     <div class="input-group">
                                                         {{ section_formset.empty_form.name|add_class:"form-control" }}
                                                         <span class="input-group-btn">
-                                                            <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>
+                                                            <a type="button" class="btn btn-danger form-row-remove-btn"><div class="delete-block" style="display: none">{{ section_formset.empty_form.DELETE }}</div><i class="fa fa-trash"></i></a>
                                                         </span>
                                                     </div>
                                                     <div class="form-error">
@@ -123,12 +123,12 @@
                                               {% for level_form in level_formset %}
                                               <div class="section-item">
                                                   {{ level_form.id }}
-                                                <div class="form-group">
+                                                <div class="form-group formset-item">
                                                     <label>{{ level_form.name.label }}</label>
                                                     <div class="input-group">
                                                         {{ level_form.name|add_class:"form-control" }}
                                                         <span class="input-group-btn">
-                                                            <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>
+                                                            <a href="" class="btn btn-danger form-row-remove-btn"><div class="delete-block" style="display: none">{{ level_form.DELETE }}</div><i class="fa fa-trash"></i></a>
                                                         </span>
                                                     </div>
                                                     <div class="form-error">
@@ -144,12 +144,12 @@
                                             <div class="empty-form-formset">
                                                 <div class="level-item">
                                                   {{ level_formset.empty_form.id }}
-                                                <div class="form-group">
+                                                <div class="form-group formset-item">
                                                     <label>{{ level_formset.empty_form.name.label }}</label>
                                                     <div class="input-group">
                                                         {{ level_formset.empty_form.name|add_class:"form-control" }}
                                                         <span class="input-group-btn">
-                                                            <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>
+                                                            <a class="btn btn-danger form-row-remove-btn"><div class="delete-block" style="display: none">{{ level_formset.empty_form.DELETE }}</div><i class="fa fa-trash"></i></a>
                                                         </span>
                                                     </div>
                                                     <div class="form-error">
@@ -168,7 +168,7 @@
                                               {% for form in user_formset %}
                                               <div class="user-item">
                                                   {{ form.id }}
-                                                  <div class="row">
+                                                  <div class="row formset-item">
                                                       <div class="col-xs-12 col-sm-7">
                                                         {{ form.profile|as_crispy_field }}
                                                         </div>
@@ -177,7 +177,7 @@
                                                           <div class="input-group">
                                                               <input type="text" class="form-control role" readonly>
                                                               <span class="input-group-btn">
-                                                                    <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>
+                                                                  <a href="" class="btn btn-danger form-row-remove-btn"><div class="delete-block" style="display: none">{{ form.DELETE }}</div><i class="fa fa-trash"></i></a>
                                                                 </span>
                                                           </div>
                                                       </div>
@@ -192,7 +192,7 @@
                                             <div class="empty-form-formset">
                                                 <div class="user-item">
                                                   {{ user_formset.empty_form.id }}
-                                                  <div class="row">
+                                                  <div class="row formset-item">
                                                       <div class="col-xs-12 col-sm-7">
                                                         {{ user_formset.empty_form.profile|as_crispy_field }}
                                                         </div>
@@ -201,7 +201,7 @@
                                                           <div class="input-group">
                                                               <input type="text" class="form-control role" readonly>
                                                               <span class="input-group-btn">
-                                                                    <button type="button" class="btn btn-danger form-row-remove-btn"><i class="fa fa-trash"></i></button>
+                                                                  <a class="btn btn-danger form-row-remove-btn"><div class="delete-block" style="display: none">{{ user_formset.empty_form.DELETE }}</div><i class="fa fa-trash"></i></a>
                                                                 </span>
                                                           </div>
                                                       </div>
@@ -241,6 +241,9 @@
             new_form_name.attr('name', new_form_name.attr('name').replace('__prefix__', total_forms));
             new_form_name.attr('id', new_form_name.attr('id').replace('__prefix__', total_forms));
             new_form_name.val('секция ' + (parseInt(total_forms)+1));
+            let new_form_delete = new_form.find('#id_section-__prefix__-DELETE');
+            new_form_delete.attr('name', new_form_delete.attr('name').replace('__prefix__', total_forms));
+            new_form_delete.attr('id', new_form_delete.attr('id').replace('__prefix__', total_forms));
             $('.sections-formset').append(new_form);
         }
         $('.add-section').on('click', function (e){
@@ -259,6 +262,9 @@
             new_form_name.attr('name', new_form_name.attr('name').replace('__prefix__', total_forms));
             new_form_name.attr('id', new_form_name.attr('id').replace('__prefix__', total_forms));
             new_form_name.val('этаж ' + (parseInt(total_forms)+1));
+            let new_form_delete = new_form.find('#id_level-__prefix__-DELETE');
+            new_form_delete.attr('name', new_form_delete.attr('name').replace('__prefix__', total_forms));
+            new_form_delete.attr('id', new_form_delete.attr('id').replace('__prefix__', total_forms));
             $('.levels-formset').append(new_form);
         }
         $('.add-level').on('click', function (e){
@@ -292,11 +298,51 @@
             let new_form_profile = new_form.find('#id_user-__prefix__-profile');
             new_form_profile.attr('name', new_form_profile.attr('name').replace('__prefix__', total_forms));
             new_form_profile.attr('id', new_form_profile.attr('id').replace('__prefix__', total_forms));
+            let new_form_delete = new_form.find('#id_user-__prefix__-DELETE');
+            new_form_delete.attr('name', new_form_delete.attr('name').replace('__prefix__', total_forms));
+            new_form_delete.attr('id', new_form_delete.attr('id').replace('__prefix__', total_forms));
             $('.users-formset').append(new_form);
         }
         $('.add-user').on('click', function (e){
             e.preventDefault();
             new_form_user();
+        });
+        $('.tab-pane').on('click', '.form-row-remove-btn', function (e){
+            e.preventDefault();
+            console.log($(this).find('.delete-block'));
+            $(this).find('.delete-block input[type=checkbox]').attr("checked", "checked");
+            $(this).parents('.formset-item').parent().css("display", "none");
+            $(this).parents('.formset-item').parent().addClass('deleted');
+            {#let url = $(this).attr('href');#}
+            {#let confirm1 = confirm('Вы уверены что хотите удалить этот объект?');#}
+            {#if (confirm1==false){#}
+            {#    return#}
+            {#$.ajax({#}
+            {#    headers: { "X-CSRFToken": '{{ csrf_token }}' },#}
+            {#    type: "GET",#}
+            {#    url: url,#}
+            {#    processData: false,#}
+            {#    contentType: false,#}
+            {#    success: function(response){#}
+            {#        console.log(response);#}
+            {#        location.reload();#}
+            {#    }#}
+        });
+
+        $('.user-item select').each(function (){
+            let user = $(this).val();
+            let input = $(this).parents('.user-item').find('.role');
+            console.log(input);
+             $.ajax({
+                 headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                 type: "POST",
+                 url: '{% url 'account:get_user_role' %}',
+                 data: {'pk': user},
+                 processData: 'json/application',
+                 success: function(response){
+                    input.val(response);
+                 }
+             });
         });
     </script>
 {% endblock %}

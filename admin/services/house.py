@@ -49,11 +49,7 @@ class HouseData:
             section_formset = self.section_formset(post, instance=created, prefix='section')
             level_formset = self.level_formset(post, instance=created, prefix='level')
             user_formset = self.user_formset(post, instance=created, prefix='user')
-            print(section_formset.non_form_errors())
-            print(level_formset.non_form_errors())
             if section_formset.is_valid() and level_formset.is_valid() and user_formset.is_valid():
-                print(section_formset.cleaned_data)
-                print(level_formset.cleaned_data)
                 section_formset.save()
                 level_formset.save()
                 user_formset.save()

@@ -1,0 +1,84 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Квартира №{{ flat.number }}, {{ flat.house.name }}</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item"><a href="{% url 'admin:flat_list' %}">Квартиры</a></li>
+                    <li class="breadcrumb-item active">Квартира №{{ flat.number }}, {{ flat.house.name }}</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Просмотр квартиры</h3>
+                    <div class="card-tools">
+                        <button class="btn btn-default btn-sm disabled" data-confirm="Лицевой счет неактивен"><i class="fa fa-dollar"></i>Принять платеж</button>
+                        <button class="btn btn-default btn-sm disabled" data-confirm="Лицевой счет неактивен"><i class="fa fa-files-o"></i> Оформить квитанцию</button>
+                        <a href="{% url 'admin:update_flat' flat.id %}" class="btn btn-primary btn-sm">
+                            <span class="hidden-xs">Редактировать квартиру</span>
+                        </a>
+                </div>
+                </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table class="table table-bordered table-striped table-view">
+                                    <tr>
+                                        <td>Лицевой счет</td>
+                                        <td>{% if flat.bank_book %}{{ flat.bank_book }}{% else %}Не указано{% endif %}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Номер квартиры</td>
+                                        <td>{{ flat.number }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Площадь</td>
+                                        <td>{{ flat.area }}м<sup>2</sup></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Дом</td>
+                                        <td>{{ flat.house }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Секция</td>
+                                        <td>{{ flat.section }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Этаж</td>
+                                        <td>{{ flat.level }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Владелец</td>
+                                        <td>{{ flat.owner }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Тариф</td>
+                                        <td>{{ flat.tariff }}</td>
+                                    </tr>
+                                </table>
+
+                            <div>
+                                <p><a href="">Посмотреть показания счетчиков</a></p>
+                                <p><a href="">Посмотреть приходы</a></p>
+                                <p><a href="">Посмотреть квитанции</a></p>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

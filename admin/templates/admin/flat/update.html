@@ -1,0 +1,111 @@
+{% extends 'admin/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+        <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Новая квартира</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item"><a href="{% url 'admin:flat_list' %}">Квартиры</a></li>
+                    <li class="breadcrumb-item active">Новая квартира</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+
+    <section class="content">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xs-12 col-lg-6">
+                            {{ form.number|as_crispy_field }}
+                            {{ form.area|as_crispy_field }}
+                            {{ form.house|as_crispy_field }}
+                            {{ form.section|as_crispy_field }}
+                            {{ form.level|as_crispy_field }}
+                            {{ form.owner|as_crispy_field }}
+                            {{ form.tariff|as_crispy_field }}
+                        </div>
+                        <div class="col-xs-12 col-lg-6">
+                            {{ form.bank_book|as_crispy_field }}
+                        </div>
+                    </div>
+                    <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group float-right">
+                                        <a href="{% url 'admin:flat_list' %}" class="btn btn-default">Отменить</a>
+                                        <button type="submit" class="btn btn-success" name="save-action">Сохранить</button>
+                                        <input type="submit" class="btn btn-success" name="save-action-add" value="Сохранить и добавить новую">
+                                    </div>
+                                </div>
+                            </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script>
+        let get_sections_levels = function (house, section=undefined, level=undefined){
+            $.ajax({
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                type: "GET",
+                url: '{% url 'admin:get_section_level' %}',
+                data: {'house': house},
+                contentType: 'json/application',
+                success: function(response){
+                    let answer = JSON.parse(response);
+                    let sections = answer['sections'];
+                    $('#id_section').empty();
+                    $('#id_level').empty();
+                    $('#id_section').append($('<option>'));
+                    for(let i=0;i<sections.length;i++){
+                        console.log(sections[i]);
+                        if (sections[i]['id'] == section){
+                            $('#id_section').append($('<option>', { value : sections[i]['id'], selected : 'selected' }).text(sections[i]['name']));
+                        }
+                        else{
+                            $('#id_section').append($('<option>', { value : sections[i]['id'] }).text(sections[i]['name']));
+                        }
+                    }
+
+                    let levels = answer['levels'];
+                    $('#id_level').append($('<option>'));
+                    for(let i=0;i<levels.length;i++){
+                        console.log(levels[i]);
+                        if (levels[i]['id'] == level) {
+                            $('#id_level').append($('<option>', {value: levels[i]['id'], selected : 'selected'}).text(levels[i]['name']));
+                        }
+                        else{
+                            $('#id_level').append($('<option>', {value: levels[i]['id']}).text(levels[i]['name']));
+                        }
+                    }
+                },
+                error: function (responce){
+                    $('#id_section').empty();
+                    $('#id_level').empty();
+                }
+            });
+        }
+
+        $('#id_house').on('change', function(){
+           let house = $(this).val();
+           get_sections_levels(house);
+        });
+        {% if update is True %}
+            let section = $('#id_section').val();
+            let level = $('#id_level').val();
+            get_sections_levels($('#id_house').val(), section, level);
+        {% else %}
+            $('#id_section').empty().append($('<option>'));
+            $('#id_level').empty().append($('<option>'));
+        {% endif %}
+    </script>
+{% endblock %}

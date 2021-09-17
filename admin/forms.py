@@ -1,9 +1,9 @@
 from django import forms
 from django.forms import TextInput
 
-from account.models import Profile
+from account.models import Profile, Owner
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
-    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level
+    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat
 
 from django.forms.widgets import ClearableFileInput
 
@@ -135,6 +135,16 @@ class RequisitesForm(forms.ModelForm):
 
 
 class HouseCreateForm(forms.ModelForm):
+    image1 = forms.ImageField(required=False, error_messages={'invalid': "Только изображения"}, widget=forms.FileInput,
+                              label="Изображение #1. Размер: (522x350)")
+    image2 = forms.ImageField(required=False, error_messages={'invalid': "Только изображения"}, widget=forms.FileInput,
+                              label="Изображение #2. Размер: (248x160)")
+    image3 = forms.ImageField(required=False, error_messages={'invalid': "Только изображения"}, widget=forms.FileInput,
+                              label="Изображение #3. Размер: (248x160)")
+    image4 = forms.ImageField(required=False, error_messages={'invalid': "Только изображения"}, widget=forms.FileInput,
+                              label="Изображение #4. Размер: (248x160)")
+    image5 = forms.ImageField(required=False, error_messages={'invalid': "Только изображения"}, widget=forms.FileInput,
+                              label="Изображение #5. Размер: (248x160)")
 
     class Meta:
         model = House
@@ -164,3 +174,42 @@ class HouseUserForm(forms.ModelForm):
     class Meta:
         model = House.users.through
         fields = ['profile']
+
+
+class FlatCreateForm(forms.ModelForm):
+    house = forms.ModelChoiceField(
+        label='Дом',
+        queryset=House.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    section = forms.ModelChoiceField(
+        required=False,
+        queryset=Section.objects.all(),
+        label='Секция',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    level = forms.ModelChoiceField(
+        required=False,
+        queryset=Level.objects.all(),
+        label='Этаж',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    owner = forms.ModelChoiceField(
+        required=False,
+        queryset=Owner.objects.all(),
+        label='Владелец',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = Flat
+        fields = '__all__'
+
+
+class FlatFilterForm(forms.Form):
+    number = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control', 'data-number': '1'}))
+    house = forms.ModelChoiceField(queryset=House.objects.all(), empty_label='',
+                                   widget=forms.Select(attrs={'class': 'form-control', 'data-number': '2'}))
+    section = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'data-number': '3'}))
+    level = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'data-number': '4'}))
+    owner = forms.ModelChoiceField(queryset=Owner.objects.all(), empty_label='',
+                                   widget=forms.Select(attrs={'class': 'form-control', 'data-number': '5'}))

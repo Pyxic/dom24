@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 
-from account.models import Profile
+from account.models import Profile, Owner
 
 
 class LoginForm(forms.ModelForm):
@@ -42,6 +42,19 @@ class ProfileChangeForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['phone', 'role']
+        widgets = {
+            'phone': forms.TextInput(attrs={'data-mask': "(000)-000-00-00",
+                                            'placeholder': '(000)-000-00-00'}),
+        }
+
+
+class OwnerChangeForm(forms.ModelForm):
+    avatar = forms.ImageField(required=False, error_messages={'invalid': "Только изображения"}, widget=forms.FileInput,
+                              label="Сменить изображения")
+
+    class Meta:
+        model = Owner
+        exclude = ['user', 'created']
         widgets = {
             'phone': forms.TextInput(attrs={'data-mask': "(000)-000-00-00",
                                             'placeholder': '(000)-000-00-00'}),

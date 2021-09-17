@@ -124,7 +124,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="pages/sessions.html" class="nav-link">
+            <a href="{% url 'admin:flat_list' %}" class="nav-link">
               <i class="nav-icon fas fa-columns"></i>
               <p>
                 Квартиры
@@ -132,7 +132,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="pages/news.html" class="nav-link">
+            <a href="{% url 'admin:owner_list' %}" class="nav-link">
               <i class="nav-icon fas fa-columns"></i>
               <p>
                 Владельцы квартир
@@ -297,6 +297,7 @@
     <script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js'%}"></script>
 <script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js'%}"></script>
 <script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js'%}"></script>
+<script src="{% static 'plugins/inputmask/jquery.inputmask.min.js' %}"></script>
 {% block script %}
 {% endblock %}
 </body>

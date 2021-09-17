@@ -1,0 +1,104 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% load filters %}
+{% load crispy_forms_tags %}
+{% block header %}
+    <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+{% endblock %}
+{% block content %}
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Новый владелец</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item"><a href="{% url 'admin:owner_list' %}">Владельцы квартир</a></li>
+                    <li class="breadcrumb-item active">Новый владелец</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+
+    <section class="content">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xs-12 col-lg-6">
+                            <div class="userAvatar">
+                                <img style="max-width: 30%" class="img-circle float-left img-responsive" src="{% if owner_form.avatar.value %}{{ owner_form.avatar.value.url }}{% else %}{% static '/dist/img/empty.jpg' %}{% endif %}">
+                                <div>
+                                    <label>{{ owner_form.avatar.label }}</label>
+                                    {{ owner_form.avatar }}
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-lg-6">
+                            {{ owner_form.status|as_crispy_field }}
+                            {{ owner_form.identify|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-12 col-lg-6">
+                            {{ user_form.last_name|as_crispy_field }}
+                            {{ user_form.first_name|as_crispy_field }}
+                            {{ owner_form.patronymic|as_crispy_field }}
+                            <div class="form-group">
+                                <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                                    {{ owner_form.birthday|add_class:"form-control datetimepicker-input" }}
+                                    <div class="input-group-append" data-target="#id_owner-birthday" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-lg-6">
+                            {{ owner_form.description|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-12 col-lg-6">
+                            <h2 class="page-header">Контактные данные</h2>
+                            {{ owner_form.phone|as_crispy_field }}
+                            {{ owner_form.viber|as_crispy_field }}
+                            {{ owner_form.telegram|as_crispy_field }}
+                            {{ user_form.email|as_crispy_field }}
+                        </div>
+                        <div class="col-xs-12 col-lg-6">
+                            <h2 class="page-header">Изменить пароль</h2>
+                            {{ user_form.password|as_crispy_field }}
+                            {{ user_form.confirm_password|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group float-right">
+                                        <a href="{% url 'admin:owner_list' %}" class="btn btn-default">Отменить</a>
+                                        <button type="submit" class="btn btn-success">Сохранить</button>
+                                    </div>
+                                </div>
+                            </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+    <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script>
+    $('#id_owner-birthday').datetimepicker({
+        locale: 'ru',
+        format: 'YYYY-MM-DD'
+    });
+    </script>
+{% endblock %}
