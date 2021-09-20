@@ -1,5 +1,6 @@
 from django import template
 
+from babel.dates import format_date
 register = template.Library()
 
 
@@ -29,3 +30,9 @@ def add_class(value, arg):
 @register.filter()
 def to_int(value):
     return int(' '.join([char for char in value if char.isdigit()]))+1
+
+
+@register.filter(name='ru_strftime')
+def ru_strftime(value, arg):
+    formating_date = format_date(value, arg, locale='ru_RU')
+    return str(formating_date)

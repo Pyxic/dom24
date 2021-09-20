@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
@@ -180,7 +182,7 @@ class Level(models.Model):
 
 
 class Flat(models.Model):
-    number = models.DecimalField("Номер квартиры", decimal_places=0, max_digits=6)
+    number = models.CharField("Номер квартиры", max_length=10)
     area = models.FloatField("Площадь (кв.м.)")
     house = models.ForeignKey(House, on_delete=models.CASCADE, verbose_name='Дом')
     section = models.ForeignKey(Section, on_delete=models.SET_NULL, verbose_name="Секция", null=True, blank=True)
@@ -191,3 +193,36 @@ class Flat(models.Model):
 
     def balance(self):
         return 'нет счета'
+
+    def __str__(self):
+        return str(self.number)
+
+
+class Counter(models.Model):
+    id = models.CharField("№", primary_key=True, max_length=15)
+    flat = models.ForeignKey(Flat, on_delete=models.CASCADE, verbose_name='Квартира')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, verbose_name='Услуга')
+    indication = models.FloatField("Текущие показания")
+    date = models.DateField()
+
+    class Types(models.TextChoices):
+        new = 'новое', _('новое')
+        taken_into_account = 'учтено', _('учтено')
+        paid = 'учтено и оплачено', _('учтено и оплачено')
+        zero = 'нулевое', _('нулевое')
+
+    status = models.CharField("Статус", choices=Types.choices, max_length=20)
+
+
+class BankBook(models.Model):
+    id = models.CharField('№', primary_key=True, max_length=15)
+    flat = models.ForeignKey(Flat, on_delete=models.CASCADE, verbose_name='Квартира')
+
+    class Status(models.TextChoices):
+        active = 'Активен', _('Активен')
+        disabled = 'Неактивен', _('Неактивен')
+
+    status = models.CharField("Статус", choices=Status.choices, max_length=20)
+
+    def __str__(self):
+        return self.id

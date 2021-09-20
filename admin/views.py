@@ -15,14 +15,22 @@ from django.views.generic.edit import FormMixin
 
 from account.forms import UserChangeForm, ProfileChangeForm
 from account.models import Profile, Owner
-from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm
+from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
-    Section, Level
+    Section, Level, Counter, BankBook
+from admin.services.counter import CounterData, filter_flat_counter
 from admin.services.flat import FlatData
 from admin.services.house import HouseData
 from admin.services.owner import OwnerData
 from admin.services.services import UnitData, ServiceData, TariffData
 from admin.services.singleton_pages import get_singleton_page_data, RequisitesPageData
+
+
+# import the logging library
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 def index(request):
@@ -268,6 +276,21 @@ def get_section_level(request):
         return JsonResponse(json.dumps({'sections': list(sections), 'levels': list(levels)}), safe=False)
 
 
+def get_section_flat(request):
+    if request.is_ajax():
+        house = request.GET.get('house')
+        sections = Section.objects.filter(house_id=house).values('name', 'id')
+        flats = Flat.objects.filter(house_id=house).values('number', 'id')
+        return JsonResponse(json.dumps({'sections': list(sections), 'flats': list(flats)}), safe=False)
+
+
+def get_flats(request):
+    if request.is_ajax():
+        section = request.GET.get('section')
+        flats = Flat.objects.filter(section_id=section).values('number', 'id')
+        return JsonResponse(json.dumps({'flats': list(flats)}), safe=False)
+
+
 class OwnerList(ListView):
     model = Owner
     template_name = 'admin/owner/index.html'
@@ -295,3 +318,76 @@ def update_owner(request, owner_id=None):
 def delete_owner(request, user_id):
     Owner.objects.get(user_id=user_id).delete()
     return redirect('admin:owner_list')
+
+
+class CounterView(FormMixin, ListView):
+    model = Counter
+    template_name = 'admin/counter/index.html'
+    form_class = CounterFilterForm
+
+    def get_queryset(self):
+        qs = super(CounterView, self).get_queryset()
+        get_params = self.request.GET.dict()
+        logger.info(get_params)
+
+        if any(get_params):
+            for param, value in get_params.items():
+                if param != 'q' and value != '':
+                    logger.info(param)
+                    qs = qs.filter(**{param: value})
+        return qs.distinct('flat', 'service')
+
+    def get_form_kwargs(self):
+        # use GET parameters as the data
+        kwargs = super().get_form_kwargs()
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
+
+
+def update_counter(request, counter_id=None):
+    counter = CounterData(counter_id)
+    form = counter.get_form(instance=True)
+    if request.method == 'POST':
+        form = counter.get_form(instance=True, post=request.POST)
+        if counter.save_data(request.POST) is True:
+            return redirect("admin:counter_list")
+    return render(request, 'admin/counter/update.html',
+                  {"form": form,
+                   "update": True if counter_id is not None else False})
+
+
+class FlatCounterList(FormMixin, DetailView):
+    model = Flat
+    template_name = 'admin/counter/flat_counter.html'
+    form_class = FlatCounterFilterForm
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data()
+        get_params = self.request.GET.dict()
+        if any(get_params):
+            context_data['counter_list'] = filter_flat_counter(self.object, get_params)
+        else:
+            context_data['counter_list'] = self.object.counter_set.all()
+        return context_data
+
+    def get_form_kwargs(self):
+        # use GET parameters as the data
+        kwargs = super().get_form_kwargs()
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
+
+
+class CounterDetail(DetailView):
+    model = Counter
+    template_name = 'admin/counter/detail.html'
+
+
+class BankBookList(FormMixin, ListView):
+    model = BankBook
+    template_name = 'admin/bank_book/index.html'

@@ -3,7 +3,7 @@ from django.forms import TextInput
 
 from account.models import Profile, Owner
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
-    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat
+    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter
 
 from django.forms.widgets import ClearableFileInput
 
@@ -213,3 +213,35 @@ class FlatFilterForm(forms.Form):
     level = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'data-number': '4'}))
     owner = forms.ModelChoiceField(queryset=Owner.objects.all(), empty_label='',
                                    widget=forms.Select(attrs={'class': 'form-control', 'data-number': '5'}))
+
+
+class CounterFilterForm(forms.Form):
+    flat__house_id = forms.ModelChoiceField(queryset=House.objects.all(), empty_label='',
+                                            widget=forms.Select(attrs={'class': 'form-control', 'data-number': '1'}))
+    section = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'data-number': '2'}))
+    flat__number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '3'}))
+    service = forms.ModelChoiceField(queryset=Service.objects.all(), empty_label='',
+                                     widget=forms.Select(attrs={'class': 'form-control', 'data-number': '4'}))
+
+
+class FlatCounterFilterForm(CounterFilterForm):
+    id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '5'}))
+    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'data-number': '6'}))
+    date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '7'}))
+
+
+class CounterCreateForm(forms.ModelForm):
+    house = forms.ModelChoiceField(
+        label='Дом',
+        queryset=House.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    section = forms.ModelChoiceField(
+        required=False,
+        queryset=Section.objects.all(),
+        label='Секция',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = Counter
+        fields = '__all__'

@@ -1,0 +1,108 @@
+{% extends 'admin/base.html' %}
+{% load crispy_forms_tags %}
+{% load filters %}
+{% block content %}
+        <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Показания счетчиков, кв. {{ flat.number }}</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item active">Показания счетчиков, кв. {{ flat.number }}</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="float-right mb-2 mt-2">
+                    <a href="{% url 'admin:create_counter' %}" class="btn btn-success">Добавить показание</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-tools">
+                            <a href="{% url 'admin:flat_counter_list' flat.id %}" class="btn btn-default btn-sm">
+                                <span class="hidden-sm">Очистить</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover sorting-table" data-filter-control="true" >
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                    <th>Месяц</th>
+                                    <th>Дом</th>
+                                    <th>Секция</th>
+                                    <th>№ квартиры</th>
+                                    <th>Счетчик</th>
+                                    <th>Текущие показания</th>
+                                    <th>Едм. Изм.</th>
+                                    <th style="width: 114px; min-width: 114px">&nbsp;</th>
+                                </tr>
+                            <tr id="w0-filters" class="filters">
+                                <form method="get" id="filter-form">
+                                    <td>{{ form.id }}</td>
+                                    <td>{{ form.status }}</td>
+                                    <td>{{ form.date }}</td>
+                                    <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ form.service }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                </form>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for counter in counter_list %}
+                                <tr class="clickable-row" href="{% url 'admin:counter_detail' counter.id %}">
+                                    <td>{{ counter.id }}</td>
+                                    <td>{{ counter.status }}</td>
+                                    <td>{{ counter.date|ru_strftime:"dd.MM.YYYY" }}</td>
+                                    <td>{{ counter.date|ru_strftime:"LLLL YYYY" }}</td>
+                                    <td>{{ counter.flat.house }}</td>
+                                    <td>{{ counter.flat.section }}</td>
+                                    <td>{{ counter.flat.number }}</td>
+                                    <td>{{ counter.service }}</td>
+                                    <td>{{ counter.indication }}</td>
+                                    <td>{{ counter.service.unit }}</td>
+                                    <td>
+                                        <div class="btn-group float-right">
+                                            <a class="btn btn-default btn-sm" href="{% url 'admin:update_counter' counter.id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
+                                            <a class="btn btn-default btn-sm" href="" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script>
+        $('#id_flat__house_id, #id_section, #id_flat__number, #id_service, #id_id, #id_status, #id_date').on('change', function (){
+            console.log('change');
+            $('#filter-form').submit();
+        });
+    </script>
+{% endblock %}
