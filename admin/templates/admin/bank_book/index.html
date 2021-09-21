@@ -1,10 +1,144 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'admin/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+        <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Лицевые счета</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item active">Лицевые счета</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </section>
 
-</body>
-</html>
+    <section class="content">
+        <div class="row mt-2">
+            <div class="col-xs-12 col-md-9">
+                <div class="row">
+                    <div class="col-xs-12 col-md-4">
+                        <div class="small-box bg-green overflow-hidden">
+                            <div class="inner">
+                                <h3>118 343.40 грн</h3>
+                                <p>Состояние кассы</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-dollar"></i>
+                            </div>
+                            <!--<span class="small-box-footer">&nbsp;</span>-->
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-4">
+                        <div class="small-box bg-blue overflow-hidden">
+                            <div class="inner">
+                                <h3>47 330.00 грн</h3>
+                                <p>Баланс по счетам</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-dollar"></i>
+                            </div>
+                            <!--<span class="small-box-footer">&nbsp;</span>-->
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-4">
+                        <div class="small-box bg-red overflow-hidden">
+                            <div class="inner">
+                                <h3>166 807.88 грн</h3>
+                                <p>Задолженность по счетам</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-dollar"></i>
+                            </div>
+                            <!--<span class="small-box-footer">&nbsp;</span>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-3">
+                <div class="btn-group float-right margin-bottom mt-2 mr-5 mb-2">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Выберите действие <span class="caret"></span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'admin:create_bankbook' %}">Добавить лицевой счет</a>
+                        <a class="dropdown-item" href="">Выгрузить в Excel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-tools">
+                            <a href="{% url 'admin:bankbook_list' %}" class="btn btn-default btn-sm">
+                                <span class="hidden-sm">Очистить</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover sorting-table" data-filter-control="true" >
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Статус</th>
+                                    <th>Квартира</th>
+                                    <th>Дом</th>
+                                    <th>Секция</th>
+                                    <th>Владелец</th>
+                                    <th>Остаток (грн.)</th>
+                                    <th style="width: 114px; min-width: 114px">&nbsp;</th>
+                                </tr>
+                            <tr id="w0-filters" class="filters">
+                                <form method="get" id="filter-form">
+                                    <td>{{ form.id }}</td>
+                                    <td></td>
+                                    <td>{{ form.flat__number }}</td>
+                                <td>{{ form.flat__house_id }}</td>
+                                <td>{{ form.section }}</td>
+                                <td>{{ form.flat__owner }}</td>
+                                <td></td>
+                                <td></td>
+                                </form>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for bankbook in bankbook_list %}
+                                <tr class="clickable-row" href="{% url 'admin:detail_bankbook' bankbook.id %}">
+                                    <td>{{ bankbook.id }}</td>
+                                    <td>{{ bankbook.status }}</td>
+                                    <td>{{ bankbook.flat }}</td>
+                                    <td>{{ bankbook.flat.house }}</td>
+                                    <td>{{ bankbook.flat.section }}</td>
+                                    <td>{{ bankbook.flat.owner }}</td>
+                                    <td></td>
+                                    <td>
+                                        <div class="btn-group float-right">
+                                            <a class="btn btn-default btn-sm" href="" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
+                                            <a class="btn btn-default btn-sm" href="" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script>
+        $('#id_id, #id_flat__house_id, #id_section, #id_flat__number').on('change', function (){
+            console.log('change');
+            $('#filter-form').submit();
+        });
+    </script>
+{% endblock %}

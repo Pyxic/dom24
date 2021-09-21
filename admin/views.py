@@ -15,9 +15,11 @@ from django.views.generic.edit import FormMixin
 
 from account.forms import UserChangeForm, ProfileChangeForm
 from account.models import Profile, Owner
-from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm
+from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm, \
+    BankBookFilterForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
     Section, Level, Counter, BankBook
+from admin.services.bankbook import BankbookData
 from admin.services.counter import CounterData, filter_flat_counter
 from admin.services.flat import FlatData
 from admin.services.house import HouseData
@@ -291,6 +293,14 @@ def get_flats(request):
         return JsonResponse(json.dumps({'flats': list(flats)}), safe=False)
 
 
+def get_owner(request):
+    if request.is_ajax():
+        flat = Flat.objects.get(id=request.GET.get('flat'))
+        owner = Owner.objects.get(id=flat.owner_id)
+        response = {'id': owner.user_id, 'fullname': owner.fullname(), 'phone': owner.phone}
+        return JsonResponse(json.dumps({'owner': response}), safe=False)
+
+
 class OwnerList(ListView):
     model = Owner
     template_name = 'admin/owner/index.html'
@@ -391,3 +401,45 @@ class CounterDetail(DetailView):
 class BankBookList(FormMixin, ListView):
     model = BankBook
     template_name = 'admin/bank_book/index.html'
+    form_class = BankBookFilterForm
+
+    def get_queryset(self):
+        qs = super(BankBookList, self).get_queryset()
+        get_params = self.request.GET.dict()
+        logger.info(get_params)
+        if any(get_params):
+            if get_params['id'] != '':
+                qs = qs.filter(id__icontains=get_params['id'])
+                del get_params['id']
+                logger.info(get_params)
+            for param, value in get_params.items():
+                if param != 'q' and value != '':
+                    logger.info(param)
+                    qs = qs.filter(**{param: value})
+        return qs
+
+    def get_form_kwargs(self):
+        # use GET parameters as the data
+        kwargs = super().get_form_kwargs()
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
+
+
+def update_bankbook(request, bankbook_id=None):
+    bankbook = BankbookData(bankbook_id)
+    form = bankbook.get_form(instance=True)
+    if request.method == 'POST':
+        form = bankbook.get_form(instance=True, post=request.POST)
+        if bankbook.save_data(request.POST) is True:
+            return redirect("admin:bankbook_list")
+    return render(request, 'admin/bank_book/update.html',
+                  {"form": form,
+                   "update": True if bankbook_id is not None else False})
+
+
+class BankbookDetail(DetailView):
+    model = BankBook
+    template_name = 'admin/bank_book/detail.html'

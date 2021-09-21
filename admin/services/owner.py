@@ -35,9 +35,9 @@ class OwnerData:
     def save_data(self, post, files):
         user_form = UserChangeForm(post, instance=self.user)
         owner_form = OwnerChangeForm(post, files, instance=self.owner, prefix='owner')
-        print(owner_form.errors)
         if user_form.is_valid() and owner_form.is_valid():
             updated_user = user_form.save(commit=False)
+            updated_user.username = user_form.cleaned_data['email']
             if 'password' in user_form.changed_data:
                 updated_user.set_password(user_form.cleaned_data['password'])
             updated_user.save()

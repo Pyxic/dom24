@@ -3,7 +3,7 @@ from django.forms import TextInput
 
 from account.models import Profile, Owner
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
-    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter
+    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter, BankBook
 
 from django.forms.widgets import ClearableFileInput
 
@@ -230,6 +230,17 @@ class FlatCounterFilterForm(CounterFilterForm):
     date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '7'}))
 
 
+class BankBookFilterForm(forms.Form):
+    id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
+    flat__house_id = forms.ModelChoiceField(queryset=House.objects.all(), empty_label='',
+                                            widget=forms.Select(attrs={'class': 'form-control'}))
+    section = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
+    flat__number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    flat__owner_id = forms.ModelChoiceField(queryset=Owner.objects.all(), empty_label='',
+                                            widget=forms.Select(attrs={'class': 'form-control'}))
+
+
 class CounterCreateForm(forms.ModelForm):
     house = forms.ModelChoiceField(
         label='Дом',
@@ -244,4 +255,21 @@ class CounterCreateForm(forms.ModelForm):
 
     class Meta:
         model = Counter
+        fields = '__all__'
+
+
+class BankbookCreateForm(forms.ModelForm):
+    house = forms.ModelChoiceField(
+        label='Дом',
+        queryset=House.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    section = forms.ModelChoiceField(
+        required=False,
+        queryset=Section.objects.all(),
+        label='Секция',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = BankBook
         fields = '__all__'

@@ -42,6 +42,7 @@ urlpatterns = [
     path('get_section_level', views.get_section_level, name='get_section_level'),
     path('get_section_flat', views.get_section_flat, name='get_section_flat'),
     path('get_flats', views.get_flats, name='get_flats'),
+    path('get_owner', views.get_owner, name='get_owner'),
     path('update_flat/<int:flat_id>', views.update_flat, name='update_flat'),
     path('delete_flat/<int:pk>', views.delete_flat, name='delete_flat'),
     path('owner_list', views.OwnerList.as_view(), name='owner_list'),
@@ -54,4 +55,8 @@ urlpatterns = [
     path('flat_counter_list/<int:pk>', views.FlatCounterList.as_view(), name='flat_counter_list'),
     path('detail_counter/<str:pk>', views.CounterDetail.as_view(), name='counter_detail'),
     path('update_counter/<str:counter_id>', views.update_counter, name='update_counter'),
+    path('bankbook_list', views.BankBookList.as_view(), name='bankbook_list'),
+    path('create_bankbook', views.update_bankbook, name='create_bankbook'),
+    path('update_bankbook/<str:bankbook_id>', views.update_bankbook, name='update_bankbook'),
+    path('detail_bankbook/<str:pk>', views.BankbookDetail.as_view(), name='detail_bankbook'),
 ]
