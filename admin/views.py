@@ -16,10 +16,11 @@ from django.views.generic.edit import FormMixin
 from account.forms import UserChangeForm, ProfileChangeForm
 from account.models import Profile, Owner
 from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm, \
-    BankBookFilterForm
+    BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
-    Section, Level, Counter, BankBook
+    Section, Level, Counter, BankBook, CashBox
 from admin.services.bankbook import BankbookData
+from admin.services.cashbox import CashBoxMixin, CashBoxData
 from admin.services.counter import CounterData, filter_flat_counter
 from admin.services.flat import FlatData
 from admin.services.house import HouseData
@@ -293,6 +294,12 @@ def get_flats(request):
         return JsonResponse(json.dumps({'flats': list(flats)}), safe=False)
 
 
+def get_bankbooks(request):
+    if request.is_ajax():
+        bankbooks = BankBook.objects.filter(flat__owner_id=request.GET.get('owner')).values('id')
+        return JsonResponse(json.dumps({'bankbooks': list(bankbooks)}), safe=False)
+
+
 def get_owner(request):
     if request.is_ajax():
         flat = Flat.objects.get(id=request.GET.get('flat'))
@@ -443,3 +450,38 @@ def update_bankbook(request, bankbook_id=None):
 class BankbookDetail(DetailView):
     model = BankBook
     template_name = 'admin/bank_book/detail.html'
+
+
+class CashBoxList(CashBoxMixin, FormMixin, ListView):
+    model = CashBox
+    template_name = 'admin/cash_box/index.html'
+    form_class = CashBoxFilterForm
+
+
+def update_cash_box_income(request, cash_box_id=None):
+    cash_box = CashBoxData(cash_box_id, CashBoxIncomeCreateForm)
+    form = cash_box.get_form(instance=True)
+    if request.method == 'POST':
+        form = cash_box.get_form(instance=True, post=request.POST)
+        if cash_box.save_data(request.POST) is True:
+            return redirect("admin:cashbox_list")
+    return render(request, 'admin/cash_box/update_income.html',
+                  {"form": form,
+                   "update": True if cash_box_id is not None else False})
+
+
+def update_cash_box_expense(request, cash_box_id=None):
+    cash_box = CashBoxData(cash_box_id, CashBoxExpenseCreateForm)
+    form = cash_box.get_form(instance=True)
+    if request.method == 'POST':
+        form = cash_box.get_form(instance=True, post=request.POST)
+        if cash_box.save_data(request.POST) is True:
+            return redirect("admin:cashbox_list")
+    return render(request, 'admin/cash_box/update_expense.html',
+                  {"form": form,
+                   "update": True if cash_box_id is not None else False})
+
+
+def delete_cash_box(request, pk):
+    CashBox.objects.get(id=pk).delete()
+    return redirect('admin:cashbox_list')

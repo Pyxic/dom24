@@ -1,9 +1,12 @@
+import math
+
 from django import forms
 from django.forms import TextInput
 
 from account.models import Profile, Owner
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
-    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter, BankBook
+    NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter, BankBook, \
+    PaymentItem, CashBox
 
 from django.forms.widgets import ClearableFileInput
 
@@ -241,6 +244,16 @@ class BankBookFilterForm(forms.Form):
                                             widget=forms.Select(attrs={'class': 'form-control'}))
 
 
+class CashBoxFilterForm(forms.Form):
+    id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
+    payment_type_id = forms.ModelChoiceField(queryset=PaymentItem.objects.all(), empty_label='',
+                                             widget=forms.Select(attrs={'class': 'form-control'}))
+    bankbook__flat__owner_id = forms.ModelChoiceField(queryset=Owner.objects.all(), empty_label='',
+                                                      widget=forms.Select(attrs={'class': 'form-control'}))
+    bankbook_id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
 class CounterCreateForm(forms.ModelForm):
     house = forms.ModelChoiceField(
         label='Дом',
@@ -273,3 +286,45 @@ class BankbookCreateForm(forms.ModelForm):
     class Meta:
         model = BankBook
         fields = '__all__'
+
+
+class CashBoxIncomeCreateForm(forms.ModelForm):
+    owner = forms.ModelChoiceField(
+        required=False,
+        label='Владелец',
+        queryset=Owner.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    payment_type = forms.ModelChoiceField(
+        label='Тип платежа', queryset=PaymentItem.objects.filter(type='приходы'),
+        required=False, empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = CashBox
+        fields = '__all__'
+        widgets = {
+            "type": forms.HiddenInput(attrs={
+                'value': 'приход'
+            })
+        }
+
+
+class CashBoxExpenseCreateForm(forms.ModelForm):
+    payment_type = forms.ModelChoiceField(
+        label='Тип платежа', queryset=PaymentItem.objects.filter(type='расходы'),
+        required=False, empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = CashBox
+        exclude = ['bankbook']
+        widgets = {
+            "type": forms.HiddenInput(attrs={
+                'value': 'расход'
+            })
+        }
+
+    def clean_amount_of_money(self):
+        return math.fabs(self.cleaned_data['amount_of_money'])
