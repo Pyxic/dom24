@@ -6,7 +6,7 @@ from django.forms import TextInput
 from account.models import Profile, Owner
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
     NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter, BankBook, \
-    PaymentItem, CashBox
+    PaymentItem, CashBox, Receipt, ReceiptService
 
 from django.forms.widgets import ClearableFileInput
 
@@ -202,6 +202,12 @@ class FlatCreateForm(forms.ModelForm):
         label='Владелец',
         empty_label='Выберите...',
         widget=forms.Select(attrs={'class': 'form-control'}))
+    bank_book = forms.ModelChoiceField(
+        required=False,
+        queryset=BankBook.objects.filter(flat_id=None, status='Активен'),
+        label='Лицевой счет',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Flat
@@ -273,7 +279,7 @@ class CounterCreateForm(forms.ModelForm):
 
 class BankbookCreateForm(forms.ModelForm):
     house = forms.ModelChoiceField(
-        label='Дом',
+        label='Дом', required=False,
         queryset=House.objects.all(), empty_label='Выберите...',
         widget=forms.Select(attrs={'class': 'form-control'}))
     section = forms.ModelChoiceField(
@@ -328,3 +334,34 @@ class CashBoxExpenseCreateForm(forms.ModelForm):
 
     def clean_amount_of_money(self):
         return math.fabs(self.cleaned_data['amount_of_money'])
+
+
+class ReceiptCreateForm(forms.ModelForm):
+    house = forms.ModelChoiceField(
+        label='Дом',
+        queryset=House.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    section = forms.ModelChoiceField(
+        required=False,
+        queryset=Section.objects.all(),
+        label='Секция',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    bankbook = forms.CharField(label='Лицевой счет', required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = Receipt
+        exclude = ['services']
+
+
+class ReceiptServiceForm(forms.ModelForm):
+    service = forms.ModelChoiceField(
+        required=False,
+        queryset=Service.objects.all(),
+        label='Услуга',
+        empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = ReceiptService
+        fields = '__all__'

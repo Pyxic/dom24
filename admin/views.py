@@ -2,6 +2,7 @@ import json
 
 from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.forms import generic_inlineformset_factory
+from django.db.models import Sum
 from django.forms import modelformset_factory
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
@@ -18,13 +19,14 @@ from account.models import Profile, Owner
 from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm, \
     BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
-    Section, Level, Counter, BankBook, CashBox
+    Section, Level, Counter, BankBook, CashBox, Receipt, MasterRequest
 from admin.services.bankbook import BankbookData
 from admin.services.cashbox import CashBoxMixin, CashBoxData
 from admin.services.counter import CounterData, filter_flat_counter
 from admin.services.flat import FlatData
 from admin.services.house import HouseData
 from admin.services.owner import OwnerData
+from admin.services.receipt import ReceiptData, get_receipt_service_data
 from admin.services.services import UnitData, ServiceData, TariffData
 from admin.services.singleton_pages import get_singleton_page_data, RequisitesPageData
 
@@ -303,9 +305,27 @@ def get_bankbooks(request):
 def get_owner(request):
     if request.is_ajax():
         flat = Flat.objects.get(id=request.GET.get('flat'))
+        bankbook = flat.bankbook_set.first()
         owner = Owner.objects.get(id=flat.owner_id)
-        response = {'id': owner.user_id, 'fullname': owner.fullname(), 'phone': owner.phone}
+        response = {'id': owner.user_id, 'fullname': owner.fullname(), 'phone': owner.phone,
+                    'bankbook': bankbook.id, 'tariff': flat.tariff_id}
         return JsonResponse(json.dumps({'owner': response}), safe=False)
+
+
+def get_service(request):
+    if request.is_ajax():
+        service = Service.objects.get(id=request.GET.get('service'))
+        tariff = Tariff.objects.get(id=request.GET.get('tariff'))
+        response = get_receipt_service_data(service, tariff)
+        return JsonResponse(json.dumps({'service': response}), safe=False)
+
+
+def get_counters(request):
+    if request.is_ajax():
+        counters = Counter.objects.filter(flat_id=request.GET.get('flat')).\
+            values('id', 'status', 'date', 'flat__house__name', 'flat__section__name', 'flat__number',
+                   'service', 'indication', 'service__unit')
+        return JsonResponse({'counters': list(counters)}, safe=False)
 
 
 class OwnerList(ListView):
@@ -482,6 +502,62 @@ def update_cash_box_expense(request, cash_box_id=None):
                    "update": True if cash_box_id is not None else False})
 
 
+class CashBoxDetail(DetailView):
+    model = CashBox
+    template_name = 'admin/cash_box/detail.html'
+
+
 def delete_cash_box(request, pk):
     CashBox.objects.get(id=pk).delete()
     return redirect('admin:cashbox_list')
+
+
+class ReceiptList(ListView):
+    model = Receipt
+    template_name = 'admin/receipt/index.html'
+
+
+def update_receipt(request, receipt_id=None):
+    receipt = ReceiptData(receipt_id)
+    form = receipt.get_form(instance=True)
+    formset = receipt.get_formset()
+    if request.method == 'POST':
+        form = receipt.get_form(instance=True, post=request.POST)
+        if receipt.save_data(request.POST) is True:
+            return redirect("admin:receipt_list")
+    return render(request, 'admin/receipt/update.html',
+                  {"form": form,
+                   "formset": formset,
+                   "counters": receipt.get_counters(),
+                   "update": True if receipt_id is not None else False})
+
+
+class ReceiptDetail(DetailView):
+    model = Receipt
+    template_name = 'admin/receipt/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ReceiptDetail, self).get_context_data(**kwargs)
+        receipt = self.get_object()
+        context['total'] = receipt.receiptservice_set.all().\
+            aggregate(Sum('price')).get('price__sum', 0.00)
+        return context
+
+
+def delete_receipt(request, receipt_id=None):
+    if receipt_id:
+        Receipt.objects.get(id=receipt_id).delete()
+    else:
+        logger.info(request.POST)
+        Receipt.objects.filter(id__in=request.POST.getlist('ids[]')).delete()
+    return redirect('admin:receipt_list')
+
+
+class MasterRequestList(ListView):
+    model = MasterRequest
+    template_name = 'admin/master_request/index.html'
+
+
+class MasterRequestCreate(CreateView):
+    model = MasterRequest
+    template_name = 'admin/master_request/create.html'

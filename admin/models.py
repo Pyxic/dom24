@@ -3,6 +3,7 @@ import datetime
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from django.db.models import Sum
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -128,7 +129,7 @@ class Tariff(models.Model):
 class TariffService(models.Model):
     tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    price = models.DecimalField("Цена", max_digits=6, decimal_places=2)
+    price = models.FloatField("Цена")
     currency = models.CharField("Валюта", default='грн', max_length=5)
 
 
@@ -192,7 +193,6 @@ class Flat(models.Model):
     level = models.ForeignKey(Level, on_delete=models.SET_NULL, verbose_name="Этаж", null=True, blank=True)
     owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, verbose_name='Владелец', null=True, blank=True)
     tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, verbose_name="Тариф", null=True)
-    bank_book = models.IntegerField("Лицевой счет", null=True, blank=True)
 
     def balance(self):
         return 'нет счета'
@@ -219,7 +219,7 @@ class Counter(models.Model):
 
 class BankBook(models.Model):
     id = models.CharField('№', primary_key=True, max_length=15)
-    flat = models.ForeignKey(Flat, on_delete=models.CASCADE, verbose_name='Квартира')
+    flat = models.ForeignKey(Flat, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Квартира')
 
     class Status(models.TextChoices):
         active = 'Активен', _('Активен')
@@ -247,4 +247,59 @@ class CashBox(models.Model):
     type = models.CharField('Приход/Расход', choices=Types.choices, max_length=10)
     amount_of_money = models.DecimalField('Сумма(грн)', decimal_places=2, max_digits=10)
     manager = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
+    comment = models.TextField("Комментарий", null=True, blank=True)
+
+
+class Receipt(models.Model):
+    id = models.CharField("№", primary_key=True, max_length=15)
+    date = models.DateField()
+    date_from = models.DateField("Период с")
+    date_to = models.DateField("Период по")
+    flat = models.ForeignKey(Flat, on_delete=models.SET_NULL, null=True, blank=True,
+                             verbose_name="Квартира")
+    is_checked = models.BooleanField("Проведена", default=True)
+    tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, null=True,
+                               verbose_name='Тариф')
+
+    class Status(models.TextChoices):
+        paid = 'оплачена', _('оплачена')
+        part = 'частично оплачена', _('частично оплачена')
+        unpaid = 'не оплачена', _('не оплачена')
+
+    status = models.CharField("Статус", choices=Status.choices, max_length=20)
+    services = models.ManyToManyField(Service, through='ReceiptService')
+
+    def get_price(self):
+        return self.receiptservice_set.all().aggregate(Sum('price')).get('price__sum', 0.00)
+
+
+class ReceiptService(models.Model):
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.RESTRICT)
+    amount = models.FloatField("Расход")
+    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True)
+    price_unit = models.FloatField("Цеа за 1 ед., грн.")
+    price = models.FloatField("Стоимость, грн.")
+
+
+class MasterRequest(models.Model):
+    date = models.DateField()
+    time = models.TimeField()
+    flat = models.ForeignKey(Flat, on_delete=models.CASCADE, verbose_name="Квартира")
+
+    class TypeMaster(models.TextChoices):
+        anyone = 'Любой специалист', _('Любой специалист')
+        plumber = 'Сантехник', _('Сантехник')
+        electrician = 'Электрик', _('Электрик')
+        locksmith = 'Слесарь', _('Слесарь')
+
+    class Status(models.TextChoices):
+        new = 'новое', _('новое')
+        process = 'в процессе', _('в процессе')
+        complete = 'выполнено', _('выполнено')
+
+    type = models.CharField("Тип мастера", choices=TypeMaster.choices, max_length=30)
+    status = models.CharField("Статус", choices=Status.choices, max_length=30)
+    master = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.TextField("Описание")
     comment = models.TextField("Комментарий", null=True, blank=True)

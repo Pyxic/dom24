@@ -1,5 +1,5 @@
 from admin.forms import FlatCreateForm
-from admin.models import Flat
+from admin.models import Flat, BankBook
 
 
 class FlatData:
@@ -27,7 +27,12 @@ class FlatData:
         else:
             form = FlatCreateForm(post, instance=self.object)
         if form.is_valid():
-            form.save()
+            flat = form.save(commit=False)
+            if 'bank_book' in form.changed_data:
+                bankbook = BankBook.objects.get(id=form.cleaned_data['bank_book'])
+                flat.save()
+                bankbook.flat_id = flat.id
+                bankbook.save()
             return True
         else:
             return False

@@ -108,7 +108,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="pages/films.html" class="nav-link">
+            <a href="{% url 'admin:receipt_list' %}" class="nav-link">
               <i class="nav-icon far fa-image"></i>
               <p>
                 Квитанции на оплату
@@ -156,7 +156,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="pages/shares.html" class="nav-link">
+            <a href="{% url 'admin:master_request_list' %}" class="nav-link">
               <i class="nav-icon fas fa-columns"></i>
               <p>
                 Заявки вызова мастера

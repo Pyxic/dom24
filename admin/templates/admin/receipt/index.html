@@ -6,12 +6,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
               <div class="col-sm-6">
-                <h1>Касса</h1>
+                <h1>Квитанции на оплату</h1>
               </div>
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                   <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
-                  <li class="breadcrumb-item active">Касса</li>
+                  <li class="breadcrumb-item active">Квитанции</li>
                 </ol>
               </div>
             </div>
@@ -66,9 +66,8 @@
                         Выберите действие <span class="caret"></span>
                     </button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'admin:create_income' %}">Создать приход</a>
-                        <a class="dropdown-item" href="{% url 'admin:create_expense' %}">Создать расход</a>
-                        <a class="dropdown-item" href="">Выгрузить в Excel</a>
+                        <a class="dropdown-item" href="{% url 'admin:create_receipt' %}">Создать общую квитанцию</a>
+                        <a class="dropdown-item delete-receipts" href="">Удалить</a>
                     </div>
                 </div>
             </div>
@@ -79,7 +78,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-tools">
-                            <a href="{% url 'admin:cashbox_list' %}" class="btn btn-default btn-sm">
+                            <a href="{% url 'admin:receipt_list' %}" class="btn btn-default btn-sm">
                                 <span class="hidden-sm">Очистить</span>
                             </a>
                         </div>
@@ -88,55 +87,57 @@
                         <table class="table table-bordered table-hover sorting-table" data-filter-control="true" >
                             <thead>
                                 <tr>
-                                    <th>№</th>
-                                    <th>Дата</th>
+                                    <th><input type="checkbox" class="select-on-check-all"></th>
+                                    <th>№ квитанции</th>
                                     <th>Статус</th>
-                                    <th>Тип платежа</th>
+                                    <th>Дата</th>
+                                    <th>Месяц</th>
+                                    <th>Квартира</th>
                                     <th>Владелец</th>
-                                    <th>Лицевой счет</th>
-                                    <th>Приход/расход</th>
+                                    <th>Проведена</th>
                                     <th>Сумма (грн.)</th>
                                     <th style="width: 114px; min-width: 114px">&nbsp;</th>
                                 </tr>
                             <tr id="w0-filters" class="filters">
                                 <form method="get" id="filter-form">
-                                    <td>{{ form.id }}</td>
                                     <td></td>
                                     <td></td>
-                                <td>{{ form.payment_type_id }}</td>
-                                <td>{{ form.bankbook__flat__owner_id }}</td>
-                                <td>{{ form.bankbook_id }}</td>
+                                    <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                    <td></td>
                                     <td></td>
                                 </form>
                             </tr>
                             </thead>
                             <tbody>
-                            {% for cashbox in cashbox_list %}
-                                <tr class="clickable-row" href="{% url 'admin:detail_cashbox' cashbox.id %}">
-                                    <td>{{ cashbox.id }}</td>
-                                    <td>{{ cashbox.date|ru_strftime:'dd.MM.YYYY' }}</td>
-                                    <td>{% if cashbox.status is True %}Проведен{% else %}Не проведен{% endif %}</td>
-                                    <td>{{ cashbox.payment_type }}</td>
-                                    <td>{{ cashbox.bankbook.flat.owner }}</td>
-                                    <td>{{ cashbox.bankbook }}</td>
-                                    <td><span class="{% if cashbox.type == 'приход' %}text-green{% else %}text-red{% endif %}">{{ cashbox.type }}</span></td>
-                                    <td><span class="{% if cashbox.type == 'приход' %}text-green{% else %}text-red{% endif %}">{% if cashbox.type == 'расход' %}-{% endif %}{{ cashbox.amount_of_money }}</span></td>
+                            <form id="delete-form" action="{% url 'admin:delete_receipts' %}" method="post">
+                            {% csrf_token %}
+                            {% for receipt in receipt_list %}
+                                <tr class="clickable-row" href="{% url 'admin:detail_receipt' receipt.id %}">
+                                <td><input type="checkbox"name="ids[]" class="checkbox-item" value="{{ receipt.id }}"></td>
+                                    <td>{{ receipt.id }}</td>
+                                <td>{{ receipt.status }}</td>
+                                    <td>{{ receipt.date|ru_strftime:'dd.MM.YYYY' }}</td>
+                                    <td>{{ receipt.date|ru_strftime:'LLLL YYYY' }}</td>
+                                    <td>{{ receipt.flat }}</td>
+                                    <td>{{ receipt.flat.owner }}</td>
+                                    <td>{% if receipt.is_checked is True %}Проведена{% else %}Не проведена{% endif %}</td>
+                                    <td>{{ receipt.get_price }}</td>
                                     <td>
                                         <div class="btn-group float-right">
-                                            <a class="btn btn-default btn-sm" href="{% if cashbox.type == 'приход' %}{% url 'admin:update_income' cashbox.id %}{% else %}{% url 'admin:update_expense' cashbox.id %}{% endif %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
-                                            <a class="btn btn-default btn-sm" href="{% url 'admin:delete_cashbox' cashbox.id %}" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
+                                            <a class="btn btn-default btn-sm" href="{% url 'admin:update_receipt' receipt.id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
+                                            <a class="btn btn-default btn-sm" href="{% url 'admin:delete_receipt' receipt.id %}" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
                                         </div>
                                     </td>
                                 </tr>
                             {% endfor %}
+                            </form>
                             </tbody>
                         </table>
-                    </div>
-                    <div class="card-footer">
-                        <div>Проведен приход: <span class="text-bold">{{ total_income }} грн</span></div>
-                        <div>Проведен расход: <span class="text-bold">{{ total_expenses }} грн</span></div>
                     </div>
                 </div>
             </div>
@@ -148,6 +149,11 @@
         $('#id_id, #id_flat__house_id, #id_section, #id_flat__number').on('change', function (){
             console.log('change');
             $('#filter-form').submit();
+        });
+
+        $('.delete-receipts').on('click', function (e){
+            e.preventDefault();
+            $('#delete-form').submit();
         });
     </script>
 {% endblock %}

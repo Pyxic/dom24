@@ -1,0 +1,94 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% load filters %}
+{% block content %}
+        <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+              <div class="col-sm-6">
+                <h1>Заявки вызова мастера</h1>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                  <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
+                  <li class="breadcrumb-item active">Заявки вызова мастера</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+    </section>
+
+     <section class="content">
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="float-right mb-2 mt-2">
+                    <a href="" class="btn btn-success">Добавить заявку</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="card">
+                <div class="card-header">
+                    <div class="card-tools">
+                    <a href="{% url 'admin:master_request_list' %}" class="btn btn-default btn-sm">
+                        <span class="hidden-sm">Очистить</span>
+                    </a>
+                </div>
+                </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover sorting-table" data-filter-control="true" >
+                            <thead>
+                                <tr>
+                                    <th>№ заявки</th>
+                                    <th>Удобное время</th>
+                                    <th>Тип мастера</th>
+                                    <th>Описание</th>
+                                    <th>Квартира</th>
+                                    <th>Владелец</th>
+                                    <th>Телефон</th>
+                                    <th>Мастер</th>
+                                    <th>Статус</th>
+                                    <th style="width: 114px; min-width: 114px">&nbsp;</th>
+                                </tr>
+                            <tr id="w0-filters" class="filters">
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for masterrequest in masterrequest_list %}
+                                <tr class="clickable-row" href="">
+                                    <td>{{ masterrequest.id }}</td>
+                                    <td>{{ masterrequest.date|ru_strftime:"dd.MM.YYYY" }} - {{ masterrequest.time }}</td>
+                                    <td>{{ masterrequest.type }}</td>
+                                    <td>{{ masterrequest.description }}</td>
+                                    <td>{{ masterrequest.flat }}</td>
+                                    <td>{{ masterrequest.flat.owner }}</td>
+                                    <td>{{ masterrequest.flat.owner.phone }}</td>
+                                    <td>{{ masterrequest.master }}</td>
+                                    <td>{{ masterrequest.status }}</td>
+                                    <td>
+                                        <div class="btn-group float-right">
+                                            <a class="btn btn-default btn-sm" href="" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
+                                            <a class="btn btn-default btn-sm" href="" title="Удалить"><i class="fa fa-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </section>
+{% endblock %}
