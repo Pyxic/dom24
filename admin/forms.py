@@ -6,7 +6,7 @@ from django.forms import TextInput
 from account.models import Profile, Owner
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
     NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter, BankBook, \
-    PaymentItem, CashBox, Receipt, ReceiptService
+    PaymentItem, CashBox, Receipt, ReceiptService, MasterRequest
 
 from django.forms.widgets import ClearableFileInput
 
@@ -365,3 +365,32 @@ class ReceiptServiceForm(forms.ModelForm):
     class Meta:
         model = ReceiptService
         fields = '__all__'
+
+
+class FlatModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.number + ', ' + obj.house.name
+
+
+class MasterRequestForm(forms.ModelForm):
+    owner = forms.ModelChoiceField(
+        required=False,
+        label='Владелец',
+        queryset=Owner.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}))
+    flat = FlatModelChoiceField(
+        label='Квартира',
+        queryset=Flat.objects.all(), empty_label='Выберите...',
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+
+    class Meta:
+        model = MasterRequest
+        fields = '__all__'
+
+
+# class MessageForm(forms.ModelForm):
+#
+#     class Meta:
+#         model = Message
+#         fields = '__all__'

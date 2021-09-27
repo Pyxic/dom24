@@ -300,6 +300,17 @@ class MasterRequest(models.Model):
 
     type = models.CharField("Тип мастера", choices=TypeMaster.choices, max_length=30)
     status = models.CharField("Статус", choices=Status.choices, max_length=30)
-    master = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True)
+    master = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Мастер')
     description = models.TextField("Описание")
     comment = models.TextField("Комментарий", null=True, blank=True)
+
+
+class Message(models.Model):
+    title = models.CharField("Заголовок", max_length=100)
+    text = models.TextField("Текст сообщения")
+    house = models.ForeignKey(House, on_delete=models.SET_NULL, verbose_name='ЖК', null=True, blank=True)
+    section = models.ForeignKey(Section, on_delete=models.SET_NULL, verbose_name='Секция', null=True, blank=True)
+    level = models.ForeignKey(Level, on_delete=models.SET_NULL, verbose_name='Этаж', null=True, blank=True)
+    flat = models.ForeignKey(Flat, on_delete=models.SET_NULL, verbose_name='Квартира', null=True, blank=True)
+    has_debt = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)

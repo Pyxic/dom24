@@ -27,7 +27,7 @@ class Profile(models.Model):
     status = models.CharField("Статус", choices=Status.choices, max_length=20, default='новый')
 
     def __str__(self):
-        return self.user.first_name + ' ' + self.user.last_name
+        return self.role + ' - ' + self.user.first_name + ' ' + self.user.last_name
 
 
 class Owner(models.Model):

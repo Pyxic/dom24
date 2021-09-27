@@ -42,6 +42,7 @@ urlpatterns = [
     path('get_section_level', views.get_section_level, name='get_section_level'),
     path('get_section_flat', views.get_section_flat, name='get_section_flat'),
     path('get_flats', views.get_flats, name='get_flats'),
+    path('get_flats_by_owner', views.get_flats_by_owner, name='get_flats_by_owner'),
     path('get_owner', views.get_owner, name='get_owner'),
     path('get_service', views.get_service, name='get_service'),
     path('get_counters', views.get_counters, name='get_counters'),
@@ -76,4 +77,9 @@ urlpatterns = [
     path('delete_receipts', views.delete_receipt, name='delete_receipts'),
     path('delete_receipt/<str:receipt_id>', views.delete_receipt, name='delete_receipt'),
     path('master_request_list', views.MasterRequestList.as_view(), name='master_request_list'),
+    path('create_master_request', views.MasterRequestCreate.as_view(), name='create_master_request'),
+    path('update_master_request/<int:pk>', views.update_master_request, name='update_master_request'),
+    path('delete_master_request/<str:pk>', views.delete_master_request, name='delete_master_request'),
+    # path('message_list', views.MessageList.as_view(), name='massage_list'),
+    # path('create_message', views.MessageCreate.as_view(), name='message_create'),
 ]

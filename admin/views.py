@@ -17,7 +17,7 @@ from django.views.generic.edit import FormMixin
 from account.forms import UserChangeForm, ProfileChangeForm
 from account.models import Profile, Owner
 from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm, \
-    BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm
+    BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm, MasterRequestForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
     Section, Level, Counter, BankBook, CashBox, Receipt, MasterRequest
 from admin.services.bankbook import BankbookData
@@ -25,6 +25,7 @@ from admin.services.cashbox import CashBoxMixin, CashBoxData
 from admin.services.counter import CounterData, filter_flat_counter
 from admin.services.flat import FlatData
 from admin.services.house import HouseData
+from admin.services.master_request import MasterRequestData
 from admin.services.owner import OwnerData
 from admin.services.receipt import ReceiptData, get_receipt_service_data
 from admin.services.services import UnitData, ServiceData, TariffData
@@ -296,6 +297,13 @@ def get_flats(request):
         return JsonResponse(json.dumps({'flats': list(flats)}), safe=False)
 
 
+def get_flats_by_owner(request):
+    if request.is_ajax():
+        owner = request.GET.get('owner')
+        flats = Flat.objects.filter(owner_id=owner).values('number', 'id', 'house__name')
+        return JsonResponse(json.dumps({'flats': list(flats)}), safe=False)
+
+
 def get_bankbooks(request):
     if request.is_ajax():
         bankbooks = BankBook.objects.filter(flat__owner_id=request.GET.get('owner')).values('id')
@@ -556,8 +564,40 @@ def delete_receipt(request, receipt_id=None):
 class MasterRequestList(ListView):
     model = MasterRequest
     template_name = 'admin/master_request/index.html'
+    ordering = ['-id']
 
 
 class MasterRequestCreate(CreateView):
     model = MasterRequest
     template_name = 'admin/master_request/create.html'
+    form_class = MasterRequestForm
+    success_url = reverse_lazy('admin:master_request_list')
+
+
+def update_master_request(request, pk=None):
+    master_request = MasterRequestData(pk)
+    form = master_request.get_form(instance=True)
+    if request.method == 'POST':
+        form = master_request.get_form(instance=True, post=request.POST)
+        if master_request.save_data(request.POST) is True:
+            return redirect("admin:receipt_list")
+    return render(request, 'admin/master_request/create.html',
+                  {"form": form})
+
+
+def delete_master_request(request, pk):
+    MasterRequest.objects.get(id=pk).delete()
+    return redirect('admin:master_request_list')
+
+
+# class MessageList(ListView):
+#     model = Message
+#     template_name = 'admin/message/index.html'
+#     ordering = ['-id']
+#
+#
+# class MessageCreate(CreateView):
+#     model = Message
+#     template_name = 'admin/message/create.html'
+#     form_class = MessageForm
+#     success_url = reverse_lazy('admin:message_list')
