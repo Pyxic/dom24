@@ -163,11 +163,18 @@
             let flat = $('#id_flat').val();
             get_sections_flats($('#id_house').val(), section, flat);
         {% else %}
-            $('#id_section').empty().append($('<option>'));
-            $('#id_flat').empty().append($('<option>'));
-            let num = parseInt(moment().format('DD/MM/YYYY HH:mm').toString().replace(/\D+/g,""));
-            console.log(num);
-            $('#id_id').val(num);
+            {% if get_params %}
+                $('#id_house').val('{{ get_params.house }}');
+                $('#id_section').val('{{ get_params.section }}');
+                $('#id_flat').val('{{ get_params.flat }}');
+                $('#id_service').val('{{ get_params.service }}');
+            {% else %}
+                $('#id_section').empty().append($('<option>'));
+                $('#id_flat').empty().append($('<option>'));
+            {% endif %}
+                let num = parseInt(moment().format('DD/MM/YYYY HH:mm').toString().replace(/\D+/g,""));
+                console.log(num);
+                $('#id_id').val(num);
         {% endif %}
     </script>
 {% endblock %}

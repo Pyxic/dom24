@@ -69,7 +69,7 @@
         <a class="nav-link" href="#" role="button">{{ request.user.first_name }} {{ request.user.last_name }}</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="logout_admin" role="button">выйти</a>
+      <a class="nav-link" href="{% url 'account:logout' %}" role="button">выйти</a>
     </li>
     </ul>
   </nav>
@@ -92,7 +92,7 @@
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href="pages/statistic.html" class="nav-link">
+            <a href="{% url 'admin:index' %}" class="nav-link">
               <i class="nav-icon fas fa-chart-line"></i>
               <p>
                 Статистика
@@ -148,7 +148,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="pages/shares.html" class="nav-link">
+            <a href="{% url 'admin:message_list' %}" class="nav-link">
               <i class="nav-icon fas fa-columns"></i>
               <p>
                 Сообщения
@@ -198,12 +198,6 @@
                   <p>услуги</p>
                 </a>
               </li>
-{#              <li class="nav-item">#}
-{#                <a href="pages/singletonepages/vip-hall.html" class="nav-link">#}
-{#                  <i class="far fa-circle nav-icon"></i>#}
-{#                  <p>тарифы</p>#}
-{#                </a>#}
-{#              </li>#}
               <li class="nav-item">
                 <a href="{% url 'admin:contact_page' 'contact_page'%}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
@@ -286,6 +280,8 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{% static 'dist/js/pages/dashboard3.js'%}"></script>
 <script src="{% static 'dist/js/custom.js'%}"></script>
+<!-- OPTIONAL SCRIPTS -->
+<script src="{% static 'plugins/chart.js/Chart.js' %}"></script>
 <script src="{% static 'plugins/summernote/summernote-bs4.min.js'%}"></script>
 <script src="{% static 'plugins/summernote/lang/summernote-ru-RU.js'%}"></script>
 <script src="{% static 'plugins/datatables/jquery.dataTables.min.js'%}"></script>
@@ -297,7 +293,7 @@
     <script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js'%}"></script>
 <script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js'%}"></script>
 <script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js'%}"></script>
-<script src="{% static 'plugins/inputmask/jquery.inputmask.min.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
 {% block script %}
 {% endblock %}
 </body>

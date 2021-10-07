@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, register_converter, converters
 
 from admin import views
 
@@ -16,6 +16,7 @@ urlpatterns = [
     path('tariff_list', views.TariffList.as_view(), name='tariff_list'),
     path('create_tariff', views.update_tariff, name='create_tariff'),
     path('update_tariff/<int:tariff_id>', views.update_tariff, name='update_tariff'),
+    path('clone_tariff/<int:tariff_id>/<int:clone>', views.update_tariff, name='clone_tariff'),
     path('delete_tariff/<int:tariff_id>', views.delete_tariff, name='delete_tariff'),
     path('get_unit_by_service', views.get_unit_by_service, name='get_unit_by_service'),
     path('roles/', views.settings_roles, name='roles'),
@@ -80,6 +81,8 @@ urlpatterns = [
     path('create_master_request', views.MasterRequestCreate.as_view(), name='create_master_request'),
     path('update_master_request/<int:pk>', views.update_master_request, name='update_master_request'),
     path('delete_master_request/<str:pk>', views.delete_master_request, name='delete_master_request'),
-    # path('message_list', views.MessageList.as_view(), name='massage_list'),
-    # path('create_message', views.MessageCreate.as_view(), name='message_create'),
+    path('message_list', views.MessageList.as_view(), name='message_list'),
+    path('create_message', views.MessageCreate.as_view(), name='create_message'),
+    path('detail_message/<int:pk>', views.MessageDetail.as_view(), name='detail_message'),
+    path('delete_messages', views.delete_message, name='delete_messages'),
 ]

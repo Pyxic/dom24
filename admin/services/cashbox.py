@@ -2,7 +2,7 @@ from django.db.models import Sum
 from django.views.generic.list import MultipleObjectMixin
 
 from admin.forms import CashBoxIncomeCreateForm
-from admin.models import CashBox
+from admin.models import CashBox, BankBook
 # import the logging library
 import logging
 
@@ -23,6 +23,32 @@ class CashBoxMixin(MultipleObjectMixin):
         return context
 
 
+class FilterMixin(MultipleObjectMixin):
+    def get_queryset(self, *args, **kwargs):
+        qs = super().get_queryset(*args, **kwargs)
+        get_params = self.request.GET.dict()
+        logger.info(get_params)
+        if any(get_params):
+            if 'date_range' in get_params and get_params['date_range'] != '':
+                date_range = get_params['date_range'].split(' - ')
+                qs = qs.filter(date__range=date_range)
+            get_params.pop('date_range', None)
+            for param, value in get_params.items():
+                if param != 'q' and value != '':
+                    logger.info(param)
+                    qs = qs.filter(**{param: value})
+        return qs
+
+    def get_form_kwargs(self, *args, **kwargs):
+        # use GET parameters as the data
+        kwargs = super().get_form_kwargs(*args, **kwargs)
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
+
+
 class CashBoxData:
     model = CashBox
     form = None
@@ -36,10 +62,16 @@ class CashBoxData:
             self.object = self.model.objects.get(id=id)
         self.form_model = form_model
 
-    def get_form(self, instance=False, post=None):
+    def get_form(self, instance=False, post=None, bankbook_id=None):
         if instance is True:
             if self.created:
-                self.form = self.form_model(post, instance=self.object)
+                if bankbook_id:
+                    bankbook = BankBook.objects.get(id=bankbook_id)
+                    self.form = self.form_model(post, instance=self.object,
+                                                initial={'owner': bankbook.flat.owner_id,
+                                                         'bankbook': bankbook_id})
+                else:
+                    self.form = self.form_model(post, instance=self.object)
             else:
                 self.form = self.form_model(post, instance=self.object,
                                             initial={'owner': self.object.bankbook.flat.owner_id if self.object.bankbook else None})

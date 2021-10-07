@@ -101,12 +101,12 @@
                             <tr id="w0-filters" class="filters">
                                 <form method="get" id="filter-form">
                                     <td>{{ form.id }}</td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>{{ form.date_range }}</td>
+                                    <td>{{ form.status }}</td>
                                 <td>{{ form.payment_type_id }}</td>
                                 <td>{{ form.bankbook__flat__owner_id }}</td>
                                 <td>{{ form.bankbook_id }}</td>
-                                <td></td>
+                                <td>{{ form.type }}</td>
                                 <td></td>
                                     <td></td>
                                 </form>
@@ -146,6 +146,11 @@
 {% block script %}
     <script>
         $('#id_id, #id_flat__house_id, #id_section, #id_flat__number').on('change', function (){
+            console.log('change');
+            $('#filter-form').submit();
+        });
+
+        $('#id_id, #id_status, #id_date_range, #id_payment_type_id, #id_bankbook__flat__owner_id, #id_bankbook_id, #id_type').on('change', function (){
             console.log('change');
             $('#filter-form').submit();
         });

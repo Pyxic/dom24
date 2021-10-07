@@ -1,6 +1,9 @@
 {% extends 'admin/base.html' %}
 {% load static %}
 {% load filters %}
+{% block header %}
+      <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css'%}">
+{% endblock %}
 {% block content %}
         <section class="content-header">
         <div class="container-fluid">
@@ -37,6 +40,7 @@
                 </div>
                 </div>
                     <div class="card-body">
+                    <form method="get" id="filter-form">
                         <table class="table table-bordered table-hover sorting-table" data-filter-control="true" >
                             <thead>
                                 <tr>
@@ -52,15 +56,16 @@
                                     <th style="width: 114px; min-width: 114px">&nbsp;</th>
                                 </tr>
                             <tr id="w0-filters" class="filters">
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+
+                                <td>{{ form.id }}</td>
+                                <td>{{ form.date_range }}</td>
+                                <td>{{ form.type }}</td>
+                                <td>{{ form.description }}</td>
+                                <td>{{ form.flat__number }}</td>
+                                <td>{{ form.flat__owner_id }}</td>
+                                <td>{{ form.flat__owner_phone }}</td>
+                                <td>{{ form.master_id }}</td>
+                                <td>{{ form.status }}</td>
                                 <td></td>
                             </tr>
                             </thead>
@@ -75,7 +80,15 @@
                                     <td>{{ masterrequest.flat.owner }}</td>
                                     <td>{{ masterrequest.flat.owner.phone }}</td>
                                     <td>{{ masterrequest.master }}</td>
-                                    <td>{{ masterrequest.status }}</td>
+                                    <td>
+                                        {% if masterrequest.status == 'новое' %}
+                                            <small class="badge badge-primary">{{ masterrequest.status }}</small>
+                                        {% elif masterrequest.status == 'в процессе' %}
+                                            <small class="badge badge-warning">{{ masterrequest.status }}</small>
+                                        {% else %}
+                                            <small class="badge badge-success">{{ masterrequest.status }}</small>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <div class="btn-group float-right">
                                             <a class="btn btn-default btn-sm" href="{% url 'admin:update_master_request' masterrequest.id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
@@ -86,9 +99,55 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                    </form>
                     </div>
                 </div>
             </div>
         </div>
      </section>
+{% endblock %}
+{% block script %}
+       <script src="{% static 'plugins/moment/moment-with-locales.min.js' %}"></script>
+    <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+    <script>
+        $('#id_id, #id_date_range, #id_type, #id_description, #id_flat__number, #id_flat__owner_id, #id_flat__owner_phone, #id_master_id, #id_status').on('change', function (){
+            console.log('change');
+            $('#filter-form').submit();
+        });
+
+        let date = $('#id_date_range').daterangepicker({
+            "autoUpdateInput": false,
+    "showDropdowns": true,
+    "opens": "center",
+        locale: {
+      format: 'YYYY-MM-DD'
+    }
+}, function(start, end, label) {
+  console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')');
+});
+        $('#id_date_range').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+      $(this).trigger('change');
+  });
+
+        $('#id_date_range').on('cancel.daterangepicker', function(ev, picker) {
+  //do something, like clearing an input
+  $('#id_date_range').val('');
+  $(this).trigger('change');
+});
+
+                $(".sorting-table").DataTable({
+          "responsive": true, "lengthChange": false, "autoWidth": false, "searching": false, "paging": false,
+            "bInfo" : false, "bSortCellsTop": true,
+          "buttons": [],
+            rowReorder: true,
+            columnDefs: [
+            { orderable: true, className: 'reorder', targets: 0 },
+                { orderable: true, className: 'reorder', targets: 1 },
+                { orderable: true, className: 'reorder', targets: 2 },
+            { orderable: false, targets: '_all' }
+        ]
+        }).buttons().container().appendTo('.sorting-table_wrapper .col-md-6:eq(0)');
+
+    </script>
 {% endblock %}

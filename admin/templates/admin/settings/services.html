@@ -57,7 +57,7 @@
                                             <div class="input-group">
                                                     {{ form.unit|add_class:"form-control" }}
                                                 <div class="input-group-append">
-                                                    <a class="input-group-text delete-service" href="">
+                                                    <a class="input-group-text delete-service {% if form.object %}{% endif %}" href="">
                                                       <span class="fa fa-trash"></span>
                                                     </a>
                                                 </div>

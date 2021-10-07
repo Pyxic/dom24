@@ -1,11 +1,13 @@
 import json
 
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Group, User
 from django.contrib.contenttypes.forms import generic_inlineformset_factory
 from django.db.models import Sum
 from django.forms import modelformset_factory
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 # Create your views here.
 from django.urls import reverse_lazy
@@ -14,21 +16,23 @@ from django.views.decorators.http import require_POST
 from django.views.generic import DeleteView, ListView, CreateView, UpdateView, DetailView
 from django.views.generic.edit import FormMixin
 
-from account.forms import UserChangeForm, ProfileChangeForm
+from account.forms import UserChangeForm, ProfileChangeForm, OwnerFilterForm
 from account.models import Profile, Owner
+from account.services.profile import has_access, has_access_for_class
 from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm, \
-    BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm, MasterRequestForm
+    BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm, MasterRequestForm, \
+    MessageForm, MasterRequestFilterForm, HouseFilterForm, ReceiptFilterForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
-    Section, Level, Counter, BankBook, CashBox, Receipt, MasterRequest
+    Section, Level, Counter, BankBook, CashBox, Receipt, MasterRequest, Message
 from admin.services.bankbook import BankbookData
-from admin.services.cashbox import CashBoxMixin, CashBoxData
+from admin.services.cashbox import CashBoxMixin, CashBoxData, FilterMixin
 from admin.services.counter import CounterData, filter_flat_counter
 from admin.services.flat import FlatData
 from admin.services.house import HouseData
 from admin.services.master_request import MasterRequestData
 from admin.services.owner import OwnerData
 from admin.services.receipt import ReceiptData, get_receipt_service_data
-from admin.services.services import UnitData, ServiceData, TariffData
+from admin.services.services import UnitData, ServiceData, TariffData, get_roles_form
 from admin.services.singleton_pages import get_singleton_page_data, RequisitesPageData
 
 
@@ -36,13 +40,21 @@ from admin.services.singleton_pages import get_singleton_page_data, RequisitesPa
 import logging
 
 # Get an instance of a logger
+from admin.services.statistic import StatisticData, StatisticMixin
+
 logger = logging.getLogger(__name__)
 
 
+@has_access(permission_page='Статистика')
 def index(request):
-    return render(request, 'admin/statistic.html')
+    user = User.objects.get(id=request.user.id)
+    logger.info(user.profile.role)
+    statistics = StatisticData()
+    return render(request, 'admin/statistic.html',
+                  {'statistic': statistics})
 
 
+@has_access(permission_page='Управление сайтом')
 def singleton_page(request, page_name):
     singleton_data = get_singleton_page_data(page_name)
     if request.method == 'POST':
@@ -51,11 +63,13 @@ def singleton_page(request, page_name):
     return render(request, singleton_data.render_url, singleton_data.get_content())
 
 
+@has_access(permission_page='Управление сайтом')
 def delete_from_gallery(request, image_id):
     Gallery.objects.get(id=image_id).delete()
     return JsonResponse({'image_id': image_id})
 
 
+@has_access(permission_page='Услуги')
 def edit_services(request):
     unit_data = UnitData()
     unit_formset = unit_data.get_formset()
@@ -73,11 +87,13 @@ def edit_services(request):
     })
 
 
+@has_access(permission_page='Управление сайтом')
 def delete_document(request, pk):
     Document.objects.get(pk=pk).delete()
     return JsonResponse({'pk': pk})
 
 
+@has_access(permission_page='Услуги')
 @require_POST
 def delete_service(request):
     pk = request.POST.get('pk')
@@ -85,6 +101,7 @@ def delete_service(request):
     return JsonResponse({'pk': pk})
 
 
+@has_access(permission_page='Услуги')
 @require_POST
 def delete_unit(request):
     pk = request.POST.get('pk')
@@ -92,13 +109,18 @@ def delete_unit(request):
     return JsonResponse({'pk': pk})
 
 
-class TariffList(ListView):
+class TariffList(UserPassesTestMixin, ListView):
     model = Tariff
     template_name = 'admin/settings/tariff/index.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Тарифы', user=current_user)
 
-def update_tariff(request, tariff_id=None):
-    tariff = TariffData(tariff_id)
+
+@has_access(permission_page='Тарифы')
+def update_tariff(request, tariff_id=None, clone=False):
+    tariff = TariffData(tariff_id, bool(clone))
     form = tariff.get_form(instance=True)
     formset = tariff.get_formset()
     if request.method == 'POST':
@@ -106,9 +128,11 @@ def update_tariff(request, tariff_id=None):
             return redirect("admin:tariff_list")
     return render(request, 'admin/settings/tariff/update.html',
                   {"form": form,
-                   "formset": formset})
+                   "formset": formset,
+                   "update": True if tariff_id else False})
 
 
+@has_access(permission_page='Тарифы')
 def delete_tariff(request, tariff_id):
     Tariff.objects.get(id=tariff_id).delete()
     return redirect('admin:tariff_list')
@@ -120,18 +144,36 @@ def get_unit_by_service(request):
         return HttpResponse(unit)
 
 
+@has_access(permission_page='Роли')
 def settings_roles(request):
-    roles = Group.objects.all()
-    return render(request, 'admin/settings/roles.html',{
-        'roles': roles
+    forms = get_roles_form()
+    if request.method == 'POST':
+        logger.info(request.POST.dict())
+        forms = get_roles_form(post=request.POST)
+        for key, role in forms.items():
+            for form in role:
+                if form.is_valid():
+                    form.save()
+    return render(request, 'admin/settings/roles.html', {
+        'forms': forms
     })
 
 
-class UserList(ListView):
+class UserList(UserPassesTestMixin, ListView):
     model = User
     template_name = 'admin/settings/user/index.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Пользователи', user=current_user)
 
+    def get_queryset(self, **kwargs):
+        qs = super(UserList, self).get_queryset(**kwargs)
+        qs = qs.exclude(id__in=Owner.objects.all().values_list('user_id'))
+        return qs
+
+
+@has_access(permission_page='Пользователи')
 def update_user(request, user_id=None):
     if user_id is None:
         user = User()
@@ -146,6 +188,7 @@ def update_user(request, user_id=None):
         profile_form = ProfileChangeForm(request.POST, instance=profile)
         if register_form.is_valid() and profile_form.is_valid():
             updated_user = register_form.save(commit=False)
+            updated_user.username = register_form.cleaned_data['email']
             if 'password' in register_form.changed_data:
                 updated_user.set_password(register_form.cleaned_data['password'])
             updated_user.save()
@@ -160,11 +203,13 @@ def update_user(request, user_id=None):
                   })
 
 
+@has_access(permission_page='Пользователи')
 def delete_user(request, user_id):
     User.objects.get(id=user_id).delete()
     return redirect('admin:user_list')
 
 
+@has_access(permission_page='Платежные реквизиты')
 def settings_requisites(request):
     requisites_data = RequisitesPageData()
     if request.method == 'POST':
@@ -173,9 +218,13 @@ def settings_requisites(request):
     return render(request, requisites_data.render_url, requisites_data.get_content())
 
 
-class PaymentItemList(ListView):
+class PaymentItemList(UserPassesTestMixin, ListView):
     model = PaymentItem
     template_name = 'admin/settings/payment_item/index.html'
+
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Платежные реквизиты', user=current_user)
 
 
 class PaymentItemCreateView(CreateView):
@@ -197,16 +246,26 @@ def delete_payment_item(request, payment_item_id):
     return redirect('admin:payment_item_list')
 
 
-class HouseList(ListView):
+class HouseList(UserPassesTestMixin, FormMixin, FilterMixin, ListView):
     model = House
+    form_class = HouseFilterForm
     template_name = 'admin/house/house/index.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Дома', user=current_user)
 
-class HouseDetail(DetailView):
+
+class HouseDetail(UserPassesTestMixin, DetailView):
     model = House
     template_name = 'admin/house/house/detail.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Дома', user=current_user)
 
+
+@has_access(permission_page='Дома')
 def update_house(request, house_id=None):
     house = HouseData(house_id)
     form = house.get_form(instance=True)
@@ -223,6 +282,7 @@ def update_house(request, house_id=None):
                    "user_formset": user_formset})
 
 
+@has_access(permission_page='Дома')
 def delete_house(request, house_id):
     House.objects.get(id=house_id).delete()
     return redirect('admin:house_list')
@@ -243,17 +303,26 @@ def delete_house_user(request, pk):
     return JsonResponse({'pk': pk})
 
 
-class FlatList(FormMixin, ListView):
+class FlatList(UserPassesTestMixin, FormMixin, ListView):
     model = Flat
     template_name = 'admin/flat/index.html'
     form_class = FlatFilterForm
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Квартиры', user=current_user)
 
-class FlatDetail(DetailView):
+
+class FlatDetail(UserPassesTestMixin, DetailView):
     model = Flat
     template_name = 'admin/flat/detail.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Квартиры', user=current_user)
 
+
+@has_access(permission_page='Квартиры')
 def update_flat(request, flat_id=None):
     flat = FlatData(flat_id)
     form = flat.get_form(instance=True)
@@ -269,6 +338,7 @@ def update_flat(request, flat_id=None):
                    "update": True if flat_id is not None else False})
 
 
+@has_access(permission_page='Квартиры')
 def delete_flat(request, pk):
     Flat.objects.get(pk=pk).delete()
     return redirect('admin:flat_list')
@@ -292,8 +362,12 @@ def get_section_flat(request):
 
 def get_flats(request):
     if request.is_ajax():
-        section = request.GET.get('section')
-        flats = Flat.objects.filter(section_id=section).values('number', 'id')
+        if 'section' in request.GET.dict():
+            section = request.GET.get('section')
+            flats = Flat.objects.filter(section_id=section).values('number', 'id')
+        else:
+            level = request.GET.get('level')
+            flats = Flat.objects.filter(level_id=level).values('number', 'id')
         return JsonResponse(json.dumps({'flats': list(flats)}), safe=False)
 
 
@@ -336,23 +410,33 @@ def get_counters(request):
         return JsonResponse({'counters': list(counters)}, safe=False)
 
 
-class OwnerList(ListView):
+class OwnerList(UserPassesTestMixin, FormMixin, ListView):
     model = Owner
+    form_class = OwnerFilterForm
     template_name = 'admin/owner/index.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Владельцы квартир', user=current_user)
 
-class OwnerDetail(DetailView):
+
+class OwnerDetail(UserPassesTestMixin, DetailView):
     model = Owner
     template_name = 'admin/owner/detail.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Владельцы квартир', user=current_user)
 
+
+@has_access(permission_page='Владельцы квартир')
 def update_owner(request, owner_id=None):
     owner = OwnerData(owner_id)
     user_form = owner.get_user_form(instance=True)
     owner_form = owner.get_owner_form(instance=True)
     if request.method == 'POST':
         user_form = owner.get_user_form(instance=True, post=request.POST)
-        owner_form = owner.get_owner_form(instance=True, post=request.POST)
+        owner_form = owner.get_owner_form(instance=True, post=request.POST, files=request.FILES)
         if owner.save_data(request.POST, request.FILES) is True:
             return redirect("admin:owner_list")
     return render(request, 'admin/owner/update.html',
@@ -360,15 +444,20 @@ def update_owner(request, owner_id=None):
                    "owner_form": owner_form})
 
 
+@has_access(permission_page='Владельцы квартир')
 def delete_owner(request, user_id):
-    Owner.objects.get(user_id=user_id).delete()
+    Owner.objects.filter(user_id=user_id).update(status=Owner.Status.disabled)
     return redirect('admin:owner_list')
 
 
-class CounterView(FormMixin, ListView):
+class CounterView(UserPassesTestMixin, FormMixin, ListView):
     model = Counter
     template_name = 'admin/counter/index.html'
     form_class = CounterFilterForm
+
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Счетчики', user=current_user)
 
     def get_queryset(self):
         qs = super(CounterView, self).get_queryset()
@@ -392,19 +481,24 @@ class CounterView(FormMixin, ListView):
         return kwargs
 
 
+@has_access(permission_page='Счетчики')
 def update_counter(request, counter_id=None):
     counter = CounterData(counter_id)
     form = counter.get_form(instance=True)
     if request.method == 'POST':
         form = counter.get_form(instance=True, post=request.POST)
         if counter.save_data(request.POST) is True:
-            return redirect("admin:counter_list")
+            if 'save-action-add' in request.POST:
+                return redirect('admin:create_counter')
+            else:
+                return redirect("admin:counter_list")
     return render(request, 'admin/counter/update.html',
                   {"form": form,
+                   "get_params": request.GET.dict(),
                    "update": True if counter_id is not None else False})
 
 
-class FlatCounterList(FormMixin, DetailView):
+class FlatCounterList(UserPassesTestMixin, FormMixin, DetailView):
     model = Flat
     template_name = 'admin/counter/flat_counter.html'
     form_class = FlatCounterFilterForm
@@ -427,16 +521,28 @@ class FlatCounterList(FormMixin, DetailView):
             })
         return kwargs
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Счетчики', user=current_user)
 
-class CounterDetail(DetailView):
+
+class CounterDetail(UserPassesTestMixin, DetailView):
     model = Counter
     template_name = 'admin/counter/detail.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Счетчики', user=current_user)
 
-class BankBookList(FormMixin, ListView):
+
+class BankBookList(UserPassesTestMixin, FormMixin, StatisticMixin, ListView):
     model = BankBook
     template_name = 'admin/bank_book/index.html'
     form_class = BankBookFilterForm
+
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Лицевые счета', user=current_user)
 
     def get_queryset(self):
         qs = super(BankBookList, self).get_queryset()
@@ -463,6 +569,7 @@ class BankBookList(FormMixin, ListView):
         return kwargs
 
 
+@has_access(permission_page='Лицевые счета')
 def update_bankbook(request, bankbook_id=None):
     bankbook = BankbookData(bankbook_id)
     form = bankbook.get_form(instance=True)
@@ -475,20 +582,38 @@ def update_bankbook(request, bankbook_id=None):
                    "update": True if bankbook_id is not None else False})
 
 
-class BankbookDetail(DetailView):
+class BankbookDetail(UserPassesTestMixin, DetailView):
     model = BankBook
     template_name = 'admin/bank_book/detail.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Лицевые счета', user=current_user)
 
-class CashBoxList(CashBoxMixin, FormMixin, ListView):
+
+class CashBoxList(UserPassesTestMixin, CashBoxMixin, FormMixin, FilterMixin, ListView):
     model = CashBox
     template_name = 'admin/cash_box/index.html'
     form_class = CashBoxFilterForm
 
+    def get_form_kwargs(self):
+        # use GET parameters as the data
+        kwargs = super().get_form_kwargs()
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Касса', user=current_user)
+
+
+@has_access(permission_page='Касса')
 def update_cash_box_income(request, cash_box_id=None):
     cash_box = CashBoxData(cash_box_id, CashBoxIncomeCreateForm)
-    form = cash_box.get_form(instance=True)
+    form = cash_box.get_form(instance=True, bankbook_id=request.GET.get('bankbook_id'))
     if request.method == 'POST':
         form = cash_box.get_form(instance=True, post=request.POST)
         if cash_box.save_data(request.POST) is True:
@@ -498,6 +623,7 @@ def update_cash_box_income(request, cash_box_id=None):
                    "update": True if cash_box_id is not None else False})
 
 
+@has_access(permission_page='Касса')
 def update_cash_box_expense(request, cash_box_id=None):
     cash_box = CashBoxData(cash_box_id, CashBoxExpenseCreateForm)
     form = cash_box.get_form(instance=True)
@@ -510,37 +636,56 @@ def update_cash_box_expense(request, cash_box_id=None):
                    "update": True if cash_box_id is not None else False})
 
 
-class CashBoxDetail(DetailView):
+class CashBoxDetail(UserPassesTestMixin, DetailView):
     model = CashBox
     template_name = 'admin/cash_box/detail.html'
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Касса', user=current_user)
 
+
+@has_access(permission_page='Касса')
 def delete_cash_box(request, pk):
     CashBox.objects.get(id=pk).delete()
     return redirect('admin:cashbox_list')
 
 
-class ReceiptList(ListView):
+class ReceiptList(UserPassesTestMixin, FormMixin, FilterMixin, StatisticMixin, ListView):
     model = Receipt
+    form_class = ReceiptFilterForm
     template_name = 'admin/receipt/index.html'
 
+    def get_form_kwargs(self, *args, **kwargs):
+        # use GET parameters as the data
+        kwargs = super().get_form_kwargs(*args, **kwargs)
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Квитанции на оплату', user=current_user)
+
+
+@has_access(permission_page='Квитанции на оплату')
 def update_receipt(request, receipt_id=None):
     receipt = ReceiptData(receipt_id)
-    form = receipt.get_form(instance=True)
+    form = receipt.get_form(instance=True, flat_id=request.GET.get('flat_id'))
     formset = receipt.get_formset()
     if request.method == 'POST':
         form = receipt.get_form(instance=True, post=request.POST)
         if receipt.save_data(request.POST) is True:
             return redirect("admin:receipt_list")
     return render(request, 'admin/receipt/update.html',
-                  {"form": form,
-                   "formset": formset,
+                  {"form": form, "formset": formset, "flat_id": request.GET.get('flat_id'),
                    "counters": receipt.get_counters(),
                    "update": True if receipt_id is not None else False})
 
 
-class ReceiptDetail(DetailView):
+class ReceiptDetail(UserPassesTestMixin, DetailView):
     model = Receipt
     template_name = 'admin/receipt/detail.html'
 
@@ -551,7 +696,12 @@ class ReceiptDetail(DetailView):
             aggregate(Sum('price')).get('price__sum', 0.00)
         return context
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Квитанции на оплату', user=current_user)
 
+
+@has_access(permission_page='Квитанции на оплату')
 def delete_receipt(request, receipt_id=None):
     if receipt_id:
         Receipt.objects.get(id=receipt_id).delete()
@@ -561,26 +711,45 @@ def delete_receipt(request, receipt_id=None):
     return redirect('admin:receipt_list')
 
 
-class MasterRequestList(ListView):
+class MasterRequestList(UserPassesTestMixin, FormMixin, FilterMixin, ListView):
     model = MasterRequest
     template_name = 'admin/master_request/index.html'
+    form_class = MasterRequestFilterForm
     ordering = ['-id']
 
+    def get_form_kwargs(self):
+        # use GET parameters as the data
+        kwargs = super().get_form_kwargs()
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
 
-class MasterRequestCreate(CreateView):
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Заявки вызова мастера', user=current_user)
+
+
+class MasterRequestCreate(UserPassesTestMixin, CreateView):
     model = MasterRequest
     template_name = 'admin/master_request/create.html'
     form_class = MasterRequestForm
     success_url = reverse_lazy('admin:master_request_list')
 
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Заявки вызова мастера', user=current_user)
 
+
+@has_access(permission_page='Заявки вызова мастера')
 def update_master_request(request, pk=None):
     master_request = MasterRequestData(pk)
     form = master_request.get_form(instance=True)
     if request.method == 'POST':
         form = master_request.get_form(instance=True, post=request.POST)
         if master_request.save_data(request.POST) is True:
-            return redirect("admin:receipt_list")
+            return redirect("admin:master_request_list")
     return render(request, 'admin/master_request/create.html',
                   {"form": form})
 
@@ -590,14 +759,48 @@ def delete_master_request(request, pk):
     return redirect('admin:master_request_list')
 
 
-# class MessageList(ListView):
-#     model = Message
-#     template_name = 'admin/message/index.html'
-#     ordering = ['-id']
-#
-#
-# class MessageCreate(CreateView):
-#     model = Message
-#     template_name = 'admin/message/create.html'
-#     form_class = MessageForm
-#     success_url = reverse_lazy('admin:message_list')
+class MessageList(UserPassesTestMixin, ListView):
+    model = Message
+    template_name = 'admin/message/index.html'
+    ordering = ['-id']
+
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Сообщения', user=current_user)
+
+
+class MessageCreate(UserPassesTestMixin, CreateView):
+    model = Message
+    template_name = 'admin/message/create.html'
+    form_class = MessageForm
+    success_url = reverse_lazy('admin:message_list')
+
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Сообщения', user=current_user)
+
+    def form_valid(self, form):
+        form.instance.from_user = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        owner = self.request.GET.get('owner_id')
+        context['owner'] = owner
+        context['has_debt'] = self.request.GET.get('has_debt')
+        return context
+
+
+class MessageDetail(UserPassesTestMixin, DetailView):
+    model = Message
+    template_name = 'admin/message/detail.html'
+
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Сообщения', user=current_user)
+
+
+def delete_message(request):
+    logger.info(request.POST)
+    Message.objects.filter(id__in=request.POST.getlist('ids[]')).delete()
+    return redirect('admin:message_list')

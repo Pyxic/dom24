@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-
+{% load static %}
 {% block content %}
     <section class="content-header">
         <div class="container-fluid">
@@ -34,7 +34,7 @@
                         <div class="row">
                             <div class="col-md-12">
                             <div class="userAvatar">
-                                <img class="img-circle img-responsive" src="{{ owner.avatar.url }}" alt="">
+                                <img class="img-circle img-responsive" src="{% if owner.avatar %}{{ owner.avatar.url }}{% else %}{% static '/dist/img/empty.jpg' %}{% endif %}" alt="">
                             </div>
                                 <table class="table table-bordered table-striped table-view">
                                     <tr>

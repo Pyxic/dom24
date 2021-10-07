@@ -1,4 +1,5 @@
 {% extends 'admin/base.html' %}
+{% load filters %}
 {% block content %}
         <section class="content-header">
         <div class="container-fluid">
@@ -25,7 +26,7 @@
                     </button>
                     <div class="dropdown-menu">
                         <a class="dropdown-item" href="{% url 'admin:create_owner' %}">Добавить владельца квартиры</a>
-                        <a class="dropdown-item" href="">Отправить сообщение должникам</a>
+                        <a class="dropdown-item" href="{% url 'admin:create_message' %}?has_debt=True">Отправить сообщение должникам</a>
                         <a class="dropdown-item" href="">Отправить приглашение</a>
                     </div>
                 </div>
@@ -54,37 +55,45 @@
                                     <th style="min-width: 200px">Квартира</th>
                                     <th>Добавлен</th>
                                     <th>Статус</th>
-                                    <th>Есть долг</th>
+                                    <th style="width: 90px; min-width: 90px">Есть долг</th>
                                     <th style="width: 114px; min-width: 114px">&nbsp;</th>
                                 </tr>
                             <tr id="w0-filters" class="filters">
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <td>{{ form.id }}</td>
+                                <td>{{ form.fullname }}</td>
+                                <td>{{ form.phone }}</td>
+                                <td>{{ form.email }}</td>
+                                <td>{{ form.house }}</td>
+                                <td>{{ form.flat }}</td>
+                                <td>{{ form.date }}</td>
+                                <td>{{ form.status }}</td>
+                                <td>{{ form.debt }}</td>
                                 <td></td>
                             </tr>
                             </thead>
                             <tbody>
                             {% for owner in object_list %}
                                 <tr class="clickable-row" href="{% url 'admin:detail_owner' owner.id %}">
-                                    <td>{{ owner.identify }}</td>
-                                    <td>{{ owner.fullname }}</td>
-                                    <td>{{ owner.phone }}</td>
-                                    <td>{{ owner.user.email }}</td>
-                                    <td>{{ owner.houses_str }}</td>
-                                    <td>{{ owner.flats_str }}</td>
-                                    <td>{{ owner.created }}</td>
-                                    <td>{{ owner.status }}</td>
-                                    <td></td>
+                                    <td data-number="1">{{ owner.identify }}</td>
+                                    <td data-number="2">{{ owner.fullname }}</td>
+                                    <td data-number="3">{{ owner.phone }}</td>
+                                    <td data-number="4">{{ owner.user.email }}</td>
+                                    <td data-number="5">{{ owner.houses_str }}</td>
+                                    <td data-number="6">{{ owner.flats_str }}</td>
+                                    <td data-number="7">{{ owner.created|ru_strftime:"dd.MM.YYYY" }}</td>
+                                    <td data-number="8">
+                                        {% if owner.status == 'новый' %}
+                                        <small class="badge badge-warning">{{ owner.status }}</small>
+                                        {% elif owner.status == 'активен' %}
+                                            <small class="badge badge-success">{{ owner.status }}</small>
+                                        {% else %}
+                                            <small class="badge badge-danger">{{ owner.status }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td data-number="9">{% if owner.has_debt %}Да{% endif %}</td>
                                     <td>
                                         <div class="btn-group float-right">
-                                            <a class="btn btn-default btn-sm" href="" title="Отправить сообщение" data-toggle="tooltip"><i class="fas fa-envelope"></i></a>
+                                            <a class="btn btn-default btn-sm" href="{% url 'admin:create_message' %}?owner_id={{ owner.id }}" title="Отправить сообщение" data-toggle="tooltip"><i class="fas fa-envelope"></i></a>
                                             <a class="btn btn-default btn-sm" href="{% url 'admin:update_owner' owner.user_id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
                                             <a class="btn btn-default btn-sm" href="{% url 'admin:delete_owner' owner.user.id %}" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
                                         </div>
@@ -106,7 +115,35 @@
             "bInfo" : false,
             "bSortCellsTop": true,
             "scrollX": true,
-          "buttons": []
-        }).buttons().container().appendTo('.sorting-table_wrapper .col-md-6:eq(0)');
+          "buttons": [],
+            rowReorder: true,
+            columnDefs: [
+                { orderable: true, className: 'reorder', targets: 1 },
+                { orderable: true, className: 'reorder', targets: 6 },
+            { orderable: false, targets: '_all' }
+                ]
+        });
+
+        $.expr[':'].icontains = function(a, i, m) {
+          return $(a).text().toLowerCase()
+              .indexOf(m[3].toLowerCase()) >= 0;
+        };
+
+        $('#id_id, #id_fullname, #id_email, #id_phone, #id_flat, #id_date').on('keyup', function() {
+            let value = $(this).val().toLowerCase();
+            let number = $(this).data('number');
+            console.log(number);
+            console.log($(".table td[data-number='"+number+"']:icontains('" + value + "')"));
+            $(".table td[data-number='"+number+"']:icontains('" + value + "')").parent().show();
+            $(".table td[data-number='"+number+"']:not(:icontains('" + value + "'))").parent().hide();
+        });
+        $('#id_house, #id_debt, #id_status').on('change', function (){
+            let value = $(this).find('option:selected').text().toLowerCase();
+            let number = $(this).data('number');
+            console.log(value);
+            console.log($(".table td[data-number='"+number+"']:icontains('" + value + "')"));
+            $(".table td[data-number='"+number+"']:icontains('" + value + "')").parent().show();
+            $(".table td[data-number='"+number+"']:not(:icontains('" + value + "'))").parent().hide();
+        });
     </script>
 {% endblock %}

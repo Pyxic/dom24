@@ -1,5 +1,6 @@
 {% extends 'admin/base.html' %}
 {% load crispy_forms_tags %}
+{% load filters %}
 {% block header %}
     <style>
     .errorlist{
@@ -24,7 +25,7 @@
               <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                   <li class="breadcrumb-item"><a href="/admin">Главная</a></li>
-                  <li class="breadcrumb-item"><a href="{% url 'admin:user_list' %}"></a>Пользователи</li>
+                  <li class="breadcrumb-item"><a href="{% url 'admin:user_list' %}">Пользователи</a></li>
                     <li class="breadcrumb-item active">Пользователь</li>
                 </ol>
               </div>
@@ -46,11 +47,25 @@
                             {{ register_form.last_name|as_crispy_field }}
                             {{ profile_form.phone|as_crispy_field }}
                             {{ profile_form.role|as_crispy_field }}
-                            {{ profile_form.status }}
+                            {{ profile_form.status|as_crispy_field }}
                         </div>
                         <div class="col-xs-12 col-md-6">
                             {{ register_form.email|as_crispy_field }}
-                            {{ register_form.password|as_crispy_field }}
+                            <div class="form-group field-useradminform-password">
+                                <label class="control-label">{{ register_form.password.label }}</label>
+                                    <div class="input-group">
+                                        {{ register_form.password|add_class:'form-control' }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button" onclick="generatePassword()">
+                                                            Сгенерировать
+                                                        </button>
+                                                        <button type="button" class="btn btn-primary" id="showPass">
+                                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                                        </button>
+                                                    </span>
+                                    </div>
+                                <div class="help-block">{{ register_form.password.errors }}</div>
+                            </div>
                             {{ register_form.confirm_password|as_crispy_field}}
                         </div>
                     </div>
@@ -62,4 +77,23 @@
             </div>
         </div>
     </section>
+{% endblock %}
+{% block script %}
+    <script>
+    $('#showPass').on('click', function(){
+        let inputText = $('#id_password, #id_confirm_password');
+        let inputType = inputText.prop('type');
+        if (inputType === 'password') {
+            inputText.prop('type', 'text');
+            $(this).children().removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            inputText.prop('type', 'password');
+            $(this).children().removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+    let generatePassword = function (){
+        let randomstring = Math.random().toString(36).slice(-8);
+        $('#id_password, #id_confirm_password').val(randomstring);
+    }
+    </script>
 {% endblock %}

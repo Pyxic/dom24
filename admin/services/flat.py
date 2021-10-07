@@ -1,5 +1,9 @@
 from admin.forms import FlatCreateForm
 from admin.models import Flat, BankBook
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class FlatData:
@@ -33,6 +37,8 @@ class FlatData:
                 flat.save()
                 bankbook.flat_id = flat.id
                 bankbook.save()
+            else:
+                flat.save()
             return True
         else:
             return False

@@ -25,9 +25,9 @@ class OwnerData:
         else:
             return UserChangeForm(post)
 
-    def get_owner_form(self, instance=False, post=None):
+    def get_owner_form(self, instance=False, post=None, files=None):
         if instance is True:
-            self.owner_form = OwnerChangeForm(post, instance=self.owner, prefix='owner')
+            self.owner_form = OwnerChangeForm(post, files, instance=self.owner, prefix='owner')
             return self.owner_form
         else:
             return OwnerChangeForm(post)

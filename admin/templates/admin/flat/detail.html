@@ -37,7 +37,7 @@
                                 <table class="table table-bordered table-striped table-view">
                                     <tr>
                                         <td>Лицевой счет</td>
-                                        <td>{% if flat.bank_book %}{{ flat.bank_book }}{% else %}Не указано{% endif %}</td>
+                                        <td>{% if flat.bankbook_set.first %}{{ flat.bankbook_set.first }}{% else %}Не указано{% endif %}</td>
                                     </tr>
                                     <tr>
                                         <td>Номер квартиры</td>
@@ -70,9 +70,9 @@
                                 </table>
 
                             <div>
-                                <p><a href="">Посмотреть показания счетчиков</a></p>
-                                <p><a href="">Посмотреть приходы</a></p>
-                                <p><a href="">Посмотреть квитанции</a></p>
+                                <p><a href="{% url 'admin:flat_counter_list' flat.pk %}">Посмотреть показания счетчиков</a></p>
+                                <p><a href="{% url 'admin:cashbox_list' %}?incomes_expenses=приход{% if flat.bankbook_set.first %}&bankbook_id={{ flat.bankbook_set.first }}{% endif %}">Посмотреть приходы</a></p>
+                                <p><a href="{% url 'admin:receipt_list' %}?flat_id={{ flat.pk }}">Посмотреть квитанции</a></p>
                             </div>
                             </div>
                         </div>

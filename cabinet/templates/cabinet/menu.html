@@ -1,0 +1,91 @@
+
+<li class="nav-item">
+    <a href="#" class="nav-link">
+        <i class="nav-icon far fa-envelope"></i>
+        <p>
+            Сводка
+            <i class="fas fa-angle-left right"></i>
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        {% for flat in flats %}
+        <li class="nav-item">
+            <a href="{% url 'cabinet:summary' flat.id %}" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>{{ flat.house.name }}, кв.{{ flat.number }}</p>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</li>
+<li class="nav-item">
+    <a href="#" class="nav-link">
+        <i class="nav-icon far fa-envelope"></i>
+        <p>
+            Квитанции
+            <i class="fas fa-angle-left right"></i>
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        <li class="nav-item">
+            <a href="{% url 'cabinet:receipt_list' %}" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Все квитанции</p>
+            </a>
+        </li>
+        {% for flat in flats %}
+        <li class="nav-item">
+            <a href="{% url 'cabinet:receipt_list' %}?flat_id={{ flat.id }}" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>{{ flat.house.name }}, кв.{{ flat.number }}</p>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</li>
+
+<li class="nav-item">
+    <a href="#" class="nav-link">
+        <i class="nav-icon far fa-envelope"></i>
+        <p>
+            Тарифы
+            <i class="fas fa-angle-left right"></i>
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        {% for flat in flats %}
+        <li class="nav-item">
+            <a href="{% url 'cabinet:detail_flatservice' flat.id %}" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>{{ flat.house.name }}, кв.{{ flat.number }}</p>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</li>
+
+<li class="nav-item">
+    <a href="{% url 'cabinet:message_list' %}" class="nav-link">
+        <i class="nav-icon fas fa-columns"></i>
+        <p>
+            Сообщения
+        </p>
+    </a>
+</li>
+<li class="nav-item">
+    <a href="{% url 'cabinet:master_request_list' %}" class="nav-link">
+        <i class="nav-icon fas fa-columns"></i>
+        <p>
+            Вызов мастера
+        </p>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a href="{% url 'cabinet:owner_profile' %}" class="nav-link">
+        <i class="nav-icon fas fa-columns"></i>
+        <p>
+            Профиль
+        </p>
+    </a>
+</li>

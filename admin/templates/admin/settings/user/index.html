@@ -76,7 +76,15 @@
                                         <td data-number="3">{{ user.profile.role }}</td>
                                         <td data-number="4">{{ user.profile.phone }}</td>
                                         <td data-number="5">{{ user.email }}</td>
-                                        <td data-number="6">{{ user.profile.status }}</td>
+                                        <td data-number="6">
+                                            {% if user.profile.status == 'новый' %}
+                                                <small class="badge badge-warning">{{ user.profile.status }}</small>
+                                            {% elif user.profile.status == 'активен' %}
+                                                <small class="badge badge-success">{{ user.profile.status }}</small>
+                                            {% elif user.profile.status == 'отключен' %}
+                                                <small class="badge badge-danger">{{ user.profile.status }}</small>
+                                            {% endif %}
+                                        </td>
                                         <td>
                                             <div class="btn-group float-right">
                                                 <a class="btn btn-default btn-sm" href="" title="Отправить приглашение" data-toggle="tooltip"><i class="fas fa-redo-alt"></i></a>

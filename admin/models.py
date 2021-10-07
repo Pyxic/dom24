@@ -1,15 +1,20 @@
 import datetime
 
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Avg, Max, Min
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 from account.models import Profile, Owner
 from admin.singleton import SingletonModel
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 class SeoText(models.Model):
@@ -105,7 +110,7 @@ class Service(models.Model):
     """Модель хранит коммунальные услуги"""
 
     name = models.CharField("Услуга", max_length=50)
-    unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True, blank=True)
+    unit = models.ForeignKey(Unit, on_delete=models.RESTRICT, null=True, blank=True)
     show = models.BooleanField("Показывать в счетчиках")
 
     def __str__(self):
@@ -195,7 +200,27 @@ class Flat(models.Model):
     tariff = models.ForeignKey(Tariff, on_delete=models.SET_NULL, verbose_name="Тариф", null=True)
 
     def balance(self):
-        return 'нет счета'
+        if self.bankbook_set.first():
+            return self.bankbook_set.first().balance()
+        return '(нет счета)'
+
+    def avg_expenses(self):
+        sum_for_month = 0
+        max_date = Receipt.objects.filter(flat_id=self.id).aggregate(Max('date__month')).get('date__month__max')
+        min_date = Receipt.objects.filter(flat_id=self.id).aggregate(Min('date__month')).get('date__month__min')
+        month_count = 0
+        logger.info(str(min_date)+" "+str(max_date))
+        if not all([max_date, min_date]):
+            return '0.00'
+        for i in range(min_date, max_date+1):
+            receipts = Receipt.objects.filter(flat_id=self.id, date__month=i)
+            month_count += 1
+            for receipt in receipts:
+                sum_for_month += receipt.get_price()
+        try:
+            return sum_for_month/month_count
+        except ZeroDivisionError:
+            return sum_for_month
 
     def __str__(self):
         return str(self.number)
@@ -208,13 +233,14 @@ class Counter(models.Model):
     indication = models.FloatField("Текущие показания")
     date = models.DateField()
 
-    class Types(models.TextChoices):
+    class TypesCounter(models.TextChoices):
         new = 'новое', _('новое')
         taken_into_account = 'учтено', _('учтено')
         paid = 'учтено и оплачено', _('учтено и оплачено')
         zero = 'нулевое', _('нулевое')
+        __empty__ = _('')
 
-    status = models.CharField("Статус", choices=Types.choices, max_length=20)
+    status = models.CharField("Статус", choices=TypesCounter.choices, max_length=20)
 
 
 class BankBook(models.Model):
@@ -224,18 +250,31 @@ class BankBook(models.Model):
     class Status(models.TextChoices):
         active = 'Активен', _('Активен')
         disabled = 'Неактивен', _('Неактивен')
+        __empty__ = _('')
 
     status = models.CharField("Статус", choices=Status.choices, max_length=20)
 
     def __str__(self):
         return self.id
 
+    def balance(self):
+        incomes = self.cashbox_set.filter(type='приход').aggregate(Sum('amount_of_money'))\
+            .get('amount_of_money__sum', 0.00)
+        receipts = sum([receipt.get_price() for receipt in self.flat.receipt_set.all()])
+        logger.info(incomes)
+        if incomes:
+            return float(incomes)-receipts
+        if receipts:
+            return 0.00-receipts
+        else:
+            return 0.00
+
 
 class CashBox(models.Model):
     id = models.CharField('№', primary_key=True, max_length=15)
     date = models.DateField()
     status = models.BooleanField('Проведен', default=True)
-    payment_type = models.ForeignKey(PaymentItem, on_delete=models.SET_NULL, verbose_name='Тип платежа',
+    payment_type = models.ForeignKey(PaymentItem, on_delete=models.RESTRICT, verbose_name='Тип платежа',
                                      null=True, blank=True)
     bankbook = models.ForeignKey(BankBook, on_delete=models.SET_NULL,
                                  null=True, blank=True, verbose_name='Лицевой счет')
@@ -243,6 +282,7 @@ class CashBox(models.Model):
     class Types(models.TextChoices):
         income = 'приход', _('приход')
         expense = 'расход', _('расход')
+        __empty__ = _('')
 
     type = models.CharField('Приход/Расход', choices=Types.choices, max_length=10)
     amount_of_money = models.DecimalField('Сумма(грн)', decimal_places=2, max_digits=10)
@@ -265,6 +305,7 @@ class Receipt(models.Model):
         paid = 'оплачена', _('оплачена')
         part = 'частично оплачена', _('частично оплачена')
         unpaid = 'не оплачена', _('не оплачена')
+        __empty__ = _('')
 
     status = models.CharField("Статус", choices=Status.choices, max_length=20)
     services = models.ManyToManyField(Service, through='ReceiptService')
@@ -292,14 +333,16 @@ class MasterRequest(models.Model):
         plumber = 'Сантехник', _('Сантехник')
         electrician = 'Электрик', _('Электрик')
         locksmith = 'Слесарь', _('Слесарь')
+        __empty__ = _('')
 
     class Status(models.TextChoices):
         new = 'новое', _('новое')
         process = 'в процессе', _('в процессе')
         complete = 'выполнено', _('выполнено')
+        __empty__ = _('')
 
     type = models.CharField("Тип мастера", choices=TypeMaster.choices, max_length=30)
-    status = models.CharField("Статус", choices=Status.choices, max_length=30)
+    status = models.CharField("Статус", choices=Status.choices, max_length=30, default='новое', blank=True)
     master = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Мастер')
     description = models.TextField("Описание")
     comment = models.TextField("Комментарий", null=True, blank=True)
@@ -312,5 +355,22 @@ class Message(models.Model):
     section = models.ForeignKey(Section, on_delete=models.SET_NULL, verbose_name='Секция', null=True, blank=True)
     level = models.ForeignKey(Level, on_delete=models.SET_NULL, verbose_name='Этаж', null=True, blank=True)
     flat = models.ForeignKey(Flat, on_delete=models.SET_NULL, verbose_name='Квартира', null=True, blank=True)
-    has_debt = models.BooleanField(default=False)
+    owner = models.ForeignKey(Owner, on_delete=models.SET_NULL, verbose_name='Владелец квартир', null=True, blank=True)
+    has_debt = models.BooleanField("Владельцам с задолженностями", default=False)
     created = models.DateTimeField(auto_now_add=True)
+    from_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def recipients(self):
+        answer = ''
+        if self.owner is not None:
+            return self.owner.fullname()
+        if self.house is None:
+            return 'Всем'
+        answer = self.house.name
+        if self.section is not None:
+            answer += ', ' + self.section.name
+        if self.level is not None:
+            answer += ', ' + self.level.name
+        if self.flat is not None:
+            answer += ', кв.' + self.flat.number
+        return answer

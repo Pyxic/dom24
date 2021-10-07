@@ -42,6 +42,10 @@ def filter_flat_counter(flat, params):
     counters = Counter.objects.filter(
         flat=flat
     )
+    if 'date' in params and params['date'] != '':
+        date_range = params['date'].split(' - ')
+        counters = counters.filter(date__range=date_range)
+    params.pop('date', None)
     for param, value in params.items():
         if param != 'q' and value != '':
             counters = counters.filter(**{param: value})

@@ -45,7 +45,7 @@
                                         <td>{{ tariff.updated }}</td>
                                         <td>
                                             <div class="btn-group float-right">
-                                                <a class="btn btn-default btn-sm" href="" title="Копировать" data-toggle="tooltip"><i class="fa fa-clone"></i></a>
+                                                <a class="btn btn-default btn-sm" href="{% url 'admin:clone_tariff' tariff.id 1 %}" title="Копировать" data-toggle="tooltip"><i class="fa fa-clone"></i></a>
                                                 <a class="btn btn-default btn-sm" href="{% url 'admin:update_tariff' tariff.id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
                                                 <a class="btn btn-default btn-sm" href="{% url 'admin:delete_tariff' tariff.id %}" title="Удалить" data-toggle="tooltip" data-pjax="0" data-method="post"><i class="fa fa-trash"></i></a>
                                             </div>

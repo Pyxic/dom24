@@ -39,10 +39,10 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="card-tools">
-                            <a href="" class="btn btn-default btn-sm">
+                            <a href="{% url 'admin:create_income' %}?bankbook_id={{ bankbook.id }}" class="btn btn-default btn-sm">
                                 <span><i class="fa fa-dollar-sign"></i> Принять платеж</span>
                             </a>
-                            <a href="" class="btn btn-default btn-sm">
+                            <a href="{% url 'admin:create_receipt' %}?flat_id={{ bankbook.flat_id }}" class="btn btn-default btn-sm">
                                 <span><i class="far fa-copy"></i> Оформить квитанцию</span>
                             </a>
                             <a href="{% url 'admin:update_bankbook' bankbook.id %}" class="btn btn-primary btn-sm">
@@ -80,8 +80,8 @@
                          </table>
                         <div class="mt-3">
                                 <p><a href="{% url 'admin:flat_counter_list' bankbook.flat_id %}">Посмотреть показания счетчиков</a></p>
-                                <p><a href="">Посмотреть приходы</a></p>
-                                <p><a href="">Посмотреть квитанции</a></p>
+                                <p><a href="{% url 'admin:cashbox_list' %}?type=приход&bankbook_id={{ bankbook.pk }}">Посмотреть приходы</a></p>
+                                <p><a href="{% url 'admin:receipt_list' %}?flat__number={{ bankbook.flat.number }}">Посмотреть квитанции</a></p>
                         </div>
                     </div>
                     </div>

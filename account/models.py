@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     phone = models.CharField("Телефон", max_length=15, null=True, blank=True)
 
     class Role(models.TextChoices):
@@ -46,6 +46,7 @@ class Owner(models.Model):
         active = 'активен', _('активен')
         new = 'новый', _('новый')
         disabled = 'отключен', _('отключен')
+        __empty__ = _('')
 
     status = models.CharField("Статус", choices=Status.choices, max_length=20, default='новый')
 
@@ -71,4 +72,28 @@ class Owner(models.Model):
     def __str__(self):
         return self.fullname()
 
+    def has_debt(self):
+        flats = self.flat_set.all()
+        for flat in flats:
+            if flat.balance() < 0:
+                return True
+            else:
+                return False
 
+
+class PermissionPage(models.Model):
+    name = models.CharField(max_length=30)
+
+    def __str__(self):
+        return str(self.id)
+
+
+class PermissionUrl(models.Model):
+    page = models.ForeignKey(PermissionPage, on_delete=models.CASCADE)
+    url = models.CharField(max_length=250)
+
+
+class PermissionAccess(models.Model):
+    page = models.ForeignKey(PermissionPage, on_delete=models.SET_NULL, null=True)
+    access = models.BooleanField()
+    role = models.CharField(choices=Profile.Role.choices, max_length=100)

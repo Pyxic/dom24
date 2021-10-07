@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django import forms
 
-from account.models import Profile, Owner
+from account.models import Profile, Owner, PermissionAccess
+from admin.models import House
 
 
 class LoginForm(forms.ModelForm):
@@ -21,10 +22,10 @@ class LoginForm(forms.ModelForm):
             raise forms.ValidationError(f'Пользователь с email {email} не найден.')
         user = User.objects.filter(email=email).first()
         if user:
-            print(user.check_password(password))
-            print(password)
             if not user.check_password(password):
                 raise forms.ValidationError("Неверный пароль")
+        if not Profile.objects.filter(user_id=user.id).exists():
+            raise forms.ValidationError('Пользователя не найдено')
         return self.cleaned_data
 
     class Meta:
@@ -37,11 +38,29 @@ class LoginForm(forms.ModelForm):
         }
 
 
+class LoginOwnerForm(LoginForm):
+
+    def clean(self):
+        email = self.cleaned_data['email']
+        password = self.cleaned_data['password']
+
+        if not User.objects.filter(email=email).exists():
+            raise forms.ValidationError(f'Пользователь с email {email} не найден.')
+        user = User.objects.filter(email=email).first()
+        if user:
+            if not user.check_password(password):
+                raise forms.ValidationError("Неверный пароль")
+        if not Owner.objects.filter(user_id=user.id).exists():
+            raise forms.ValidationError('Пользователя не найдено')
+        return self.cleaned_data
+
+
+
 class ProfileChangeForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['phone', 'role']
+        fields = ['phone', 'role', 'status']
         widgets = {
             'phone': forms.TextInput(attrs={'data-mask': "(000)-000-00-00",
                                             'placeholder': '(000)-000-00-00'}),
@@ -64,10 +83,20 @@ class OwnerChangeForm(forms.ModelForm):
 class UserChangeForm(forms.ModelForm):
     confirm_password = forms.CharField(label='Повторите пароль', widget=forms.PasswordInput, required=False)
     password = forms.CharField(label='Пароль', widget=forms.PasswordInput, required=False)
+    email = forms.EmailField(required=True, label='Адрес электроннной почты')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.id:
+            self.fields['password'] = forms.CharField(label='Пароль', widget=forms.PasswordInput, required=True)
+            self.fields['confirm_password'] = forms.CharField(label='Пароль', widget=forms.PasswordInput, required=True)
 
     def clean(self):
-        password = self.cleaned_data['password']
-        confirm_password = self.cleaned_data['confirm_password']
+        try:
+            password = self.cleaned_data['password']
+            confirm_password = self.cleaned_data['confirm_password']
+        except KeyError:
+            raise forms.ValidationError('Введите пароли')
         if 'password' in self.changed_data:
             if password != confirm_password:
                 raise forms.ValidationError(f'Пароли не совпадают')
@@ -84,3 +113,29 @@ class UserChangeForm(forms.ModelForm):
         model = User
         fields = ['email', 'first_name', 'last_name', 'password', 'confirm_password']
 
+
+class OwnerFilterForm(forms.Form):
+    id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '1'}))
+    fullname = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '2'}))
+    phone = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '3'}))
+    email = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '4'}))
+    house = forms.ModelChoiceField(queryset=House.objects.all(), empty_label='',
+                                   widget=forms.Select(attrs={'class': 'form-control', 'data-number': '5'}))
+    flat = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '6'}))
+    date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '7'}))
+    status = forms.ChoiceField(choices=Owner.Status.choices,
+                               widget=forms.Select(attrs={'class': 'form-control', 'data-number': '8'}))
+    debt = forms.ChoiceField(choices=(('', ''), ('Да', 'Да')),
+                             widget=forms.Select(attrs={'class': 'form-control', 'data-number': '9'}))
+
+
+class PermissionAccessForm(forms.ModelForm):
+
+    class Meta:
+        model = PermissionAccess
+        fields = '__all__'
+        widgets = {
+            'role': forms.HiddenInput,
+            'page': forms.HiddenInput,
+            'access': forms.CheckboxInput
+        }

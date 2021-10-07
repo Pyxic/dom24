@@ -6,7 +6,7 @@ from django.forms import TextInput
 from account.models import Profile, Owner
 from admin.models import MainPage, AboutUs, ServicePage, ContactPage, SeoText, Gallery, CustomerService, Document, \
     NearBlock, Unit, Service, Tariff, TariffService, Requisites, House, Section, Level, Flat, Counter, BankBook, \
-    PaymentItem, CashBox, Receipt, ReceiptService, MasterRequest
+    PaymentItem, CashBox, Receipt, ReceiptService, MasterRequest, Message
 
 from django.forms.widgets import ClearableFileInput
 
@@ -224,6 +224,11 @@ class FlatFilterForm(forms.Form):
                                    widget=forms.Select(attrs={'class': 'form-control', 'data-number': '5'}))
 
 
+class HouseFilterForm(forms.Form):
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+
 class CounterFilterForm(forms.Form):
     flat__house_id = forms.ModelChoiceField(queryset=House.objects.all(), empty_label='',
                                             widget=forms.Select(attrs={'class': 'form-control', 'data-number': '1'}))
@@ -235,13 +240,15 @@ class CounterFilterForm(forms.Form):
 
 class FlatCounterFilterForm(CounterFilterForm):
     id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '5'}))
-    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control', 'data-number': '6'}))
+    status = forms.ChoiceField(choices=Counter.TypesCounter.choices, widget=forms.Select(
+        attrs={'class': 'form-control', 'data-number': '6'}))
     date = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'data-number': '7'}))
 
 
 class BankBookFilterForm(forms.Form):
     id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
+    status = forms.ChoiceField(choices=BankBook.Status.choices, widget=forms.Select(attrs={'class': 'form-control',
+                                                                                           'data-number': '2'}))
     flat__house_id = forms.ModelChoiceField(queryset=House.objects.all(), empty_label='',
                                             widget=forms.Select(attrs={'class': 'form-control'}))
     section = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
@@ -252,12 +259,43 @@ class BankBookFilterForm(forms.Form):
 
 class CashBoxFilterForm(forms.Form):
     id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
-    status = forms.ChoiceField(widget=forms.Select(attrs={'class': 'form-control'}))
+    date_range = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    status = forms.ChoiceField(choices=(('', ''), (True, 'Проведен'), (False, 'Не проведен')),
+                               widget=forms.Select(attrs={'class': 'form-control'}))
     payment_type_id = forms.ModelChoiceField(queryset=PaymentItem.objects.all(), empty_label='',
                                              widget=forms.Select(attrs={'class': 'form-control'}))
     bankbook__flat__owner_id = forms.ModelChoiceField(queryset=Owner.objects.all(), empty_label='',
                                                       widget=forms.Select(attrs={'class': 'form-control'}))
     bankbook_id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    type = forms.ChoiceField(choices=CashBox.Types.choices, widget=forms.Select(attrs={'class': 'form-control'}))
+
+
+class MasterRequestFilterForm(forms.Form):
+    id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    date_range = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    type = forms.ChoiceField(choices=MasterRequest.TypeMaster.choices,
+                             widget=forms.Select(attrs={'class': 'form-control'}))
+    description = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    flat__number = forms.CharField(max_length=20, widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    flat__owner_id = forms.ModelChoiceField(queryset=Owner.objects.all(), empty_label='',
+                                            widget=forms.Select(attrs={'class': 'form-control'}))
+    flat__owner_phone = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    master_id = forms.ModelChoiceField(queryset=Profile.objects.all(), empty_label='',
+                                       widget=forms.Select(attrs={'class': 'form-control'}))
+    status = forms.ChoiceField(choices=MasterRequest.Status.choices,
+                               widget=forms.Select(attrs={'class': 'form-control'}))
+
+
+class ReceiptFilterForm(forms.Form):
+    id = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    status = forms.ChoiceField(choices=Receipt.Status.choices,
+                               widget=forms.Select(attrs={'class': 'form-control'}))
+    date_range = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    flat__number = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    flat__owner_id = forms.ModelChoiceField(queryset=Owner.objects.all(), empty_label='',
+                                            widget=forms.Select(attrs={'class': 'form-control'}))
+    is_checked = forms.ChoiceField(choices=(('', ''), (True, 'Проведена'), (False, 'Не проведена')),
+                                   widget=forms.Select(attrs={'class': 'form-control'}))
 
 
 class CounterCreateForm(forms.ModelForm):
@@ -389,8 +427,8 @@ class MasterRequestForm(forms.ModelForm):
         fields = '__all__'
 
 
-# class MessageForm(forms.ModelForm):
-#
-#     class Meta:
-#         model = Message
-#         fields = '__all__'
+class MessageForm(forms.ModelForm):
+
+    class Meta:
+        model = Message
+        exclude = ['from_user']

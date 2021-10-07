@@ -65,7 +65,7 @@
                                     <td data-number="3">{% if flat.section %}{{ flat.section }}{% else %}не задано{% endif %}</td>
                                     <td data-number="4">{% if flat.level %}{{ flat.level }}{% else %}не задано{% endif %}</td>
                                     <td data-number="5">{% if flat.owner %}{{ flat.owner }}{% else %}не задано{% endif %}</td>
-                                    <td>{{ flat.balance }}</td>
+                                    <td class="{% if flat.balance > 0 %}text-green{% elif flat.balance < 0 %}text-red{% endif %}">{{ flat.balance }}</td>
                                     <td>
                                         <div class="btn-group float-right">
                                             <a class="btn btn-default btn-sm" href="{% url 'admin:update_flat' flat.id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>

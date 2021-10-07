@@ -67,8 +67,8 @@
   <div class="card">
       <nav>
           <div class="tab-links" id="nav-tab" role="tablist">
-            <a class="tab-links-item active" href="#nav-tenant">Для жильца</a>
-            <a class="tab-links-item" href="#nav-admin">Для администрации</a>
+            <a class="tab-links-item" href="{% url 'account:login_owner' %}">Для жильца</a>
+            <a class="tab-links-item active" href="#nav-admin">Для администрации</a>
           </div>
       </nav>
     <div class="card-body login-card-body">

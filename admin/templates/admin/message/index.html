@@ -31,64 +31,63 @@
                 <div class="card">
                 <div class="card-header">
                     <div class="card-tools">
-                    <a href="{% url 'admin:master_request_list' %}" class="btn btn-default btn-sm">
+                    <a href="{% url 'admin:message_list' %}" class="btn btn-default btn-sm">
                         <span class="hidden-sm">Очистить</span>
                     </a>
                 </div>
                 </div>
                     <div class="card-body">
+                        <div class="row m-0">
+                            <div class="col-md-12">
+                                    <div class="form-group float-left">
+                                        <button type="button" class="btn btn-default btn-sm checkbox-toggle"><i class="fal fa-square"></i></button>
+                                        <button type="button" class="btn btn-default btn-sm delete-many"><i class="fa fa-trash"></i></button>
+                                    </div>
+                            </div>
+                        </div>
+                    <form id="delete-form" action="{% url 'admin:delete_messages' %}" method="post">
+                    {% csrf_token %}
                         <table class="table table-bordered table-hover sorting-table" data-filter-control="true" >
                             <thead>
                                 <tr>
-                                    <th>№ заявки</th>
-                                    <th>Удобное время</th>
-                                    <th>Тип мастера</th>
-                                    <th>Описание</th>
-                                    <th>Квартира</th>
-                                    <th>Владелец</th>
-                                    <th>Телефон</th>
-                                    <th>Мастер</th>
-                                    <th>Статус</th>
-                                    <th style="width: 114px; min-width: 114px">&nbsp;</th>
+                                    <th style="width: 50px;"></th>
+                                    <th>Получатели</th>
+                                    <th>Текст</th>
+                                    <th>Дата</th>
                                 </tr>
-                            <tr id="w0-filters" class="filters">
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
                             </thead>
                             <tbody>
-                            {% for masterrequest in masterrequest_list %}
-                                <tr class="clickable-row" href="">
-                                    <td>{{ masterrequest.id }}</td>
-                                    <td>{{ masterrequest.date|ru_strftime:"dd.MM.YYYY" }} - {{ masterrequest.time }}</td>
-                                    <td>{{ masterrequest.type }}</td>
-                                    <td>{{ masterrequest.description }}</td>
-                                    <td>{{ masterrequest.flat }}</td>
-                                    <td>{{ masterrequest.flat.owner }}</td>
-                                    <td>{{ masterrequest.flat.owner.phone }}</td>
-                                    <td>{{ masterrequest.master }}</td>
-                                    <td>{{ masterrequest.status }}</td>
+                            {% for message in message_list %}
+                                <tr class="clickable-row" href="{% url 'admin:detail_message' message.pk %}">
                                     <td>
-                                        <div class="btn-group float-right">
-                                            <a class="btn btn-default btn-sm" href="{% url 'admin:update_master_request' masterrequest.id %}" title="Редактировать" data-toggle="tooltip"><i class="fas fa-pencil-alt"></i></a>
-                                            <a class="btn btn-default btn-sm" href="{% url 'admin:delete_master_request' masterrequest.id %}" title="Удалить"><i class="fa fa-trash"></i></a>
-                                        </div>
+                                        <input type="checkbox" name="ids[]" value="{{ message.id }}" class="checkbox-item">
                                     </td>
+                                    <td><a href="">{{message.recipients}}</a></td>
+                                    <td><b>{{ message.title }}</b> - {{ message.text }}</td>
+                                    <td>{{ message.created }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
                         </table>
+                      </form>
                     </div>
                 </div>
             </div>
         </div>
      </section>
+{% endblock %}
+{% block script %}
+    <script>
+    $('.delete-many').on('click', function (e){
+            e.preventDefault();
+            $('#delete-form').submit();
+        });
+
+
+    $(".sorting-table").DataTable({
+          "responsive": true, "lengthChange": false, "autoWidth": false, "paging": false,
+            "bInfo" : false, "ordering": false,
+          "buttons": []
+        });
+    </script>
 {% endblock %}

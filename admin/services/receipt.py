@@ -2,7 +2,7 @@ from django.db import models
 from django.forms import inlineformset_factory
 
 from admin.forms import ReceiptCreateForm, ReceiptServiceForm
-from admin.models import Receipt, ReceiptService, Service, Tariff, TariffService, Counter
+from admin.models import Receipt, ReceiptService, Service, Tariff, TariffService, Counter, Flat
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 
@@ -23,10 +23,17 @@ class ReceiptData:
         else:
             self.object = self.model.objects.get(id=id)
 
-    def get_form(self, instance=False, post=None):
+    def get_form(self, instance=False, post=None, flat_id=None):
         if instance is True:
             if self.created:
-                self.form = ReceiptCreateForm(post, instance=self.object)
+                if flat_id:
+                    flat = Flat.objects.get(id=flat_id)
+                    self.form = ReceiptCreateForm(post, instance=self.object,
+                                                  initial={'house': flat.house_id,
+                                                           'section': flat.section_id,
+                                                           'flat': flat.id})
+                else:
+                    self.form = ReceiptCreateForm(post, instance=self.object)
             else:
                 self.form = ReceiptCreateForm(post, instance=self.object,
                                               initial={'house': self.object.flat.house_id if self.object.flat else None,

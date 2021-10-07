@@ -403,6 +403,8 @@
              get_owner(flat);
              $('#tariff-url').text($('#id_tariff option:selected').text());
              $('#id_tariff').parent().parent().css('display', 'none');
+        {% elif flat_id %}
+            $('#id_flat').trigger('change');
         {% else %}
             $('#id_section').empty().append($('<option>'));
             $('#id_flat').empty().append($('<option>'));

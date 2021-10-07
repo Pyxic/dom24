@@ -74,7 +74,21 @@
                         </div>
                         <div class="col-xs-12 col-lg-6">
                             <h2 class="page-header">Изменить пароль</h2>
-                            {{ user_form.password|as_crispy_field }}
+                            <div class="form-group field-useradminform-password">
+                                <label class="control-label">{{ user_form.password.label }}</label>
+                                    <div class="input-group">
+                                        {{ user_form.password|add_class:'form-control' }}
+                                                    <span class="input-group-btn">
+                                                        <button class="btn btn-default" type="button" onclick="generatePassword()">
+                                                            Сгенерировать
+                                                        </button>
+                                                        <button type="button" class="btn btn-primary" id="showPass">
+                                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                                        </button>
+                                                    </span>
+                                    </div>
+                                <div class="help-block">{{ user_form.password.errors }}</div>
+                            </div>
                             {{ user_form.confirm_password|as_crispy_field }}
                         </div>
                     </div>
@@ -98,7 +112,24 @@
     <script>
     $('#id_owner-birthday').datetimepicker({
         locale: 'ru',
-        format: 'YYYY-MM-DD'
+        format: 'YYYY-MM-DD',
+        maxDate: moment().format('YYYY-MM-DD'),
     });
+
+        $('#showPass').on('click', function(){
+        let inputText = $('#id_password, #id_confirm_password');
+        let inputType = inputText.prop('type');
+        if (inputType === 'password') {
+            inputText.prop('type', 'text');
+            $(this).children().removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            inputText.prop('type', 'password');
+            $(this).children().removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+    let generatePassword = function (){
+        let randomstring = Math.random().toString(36).slice(-8);
+        $('#id_password, #id_confirm_password').val(randomstring);
+    }
     </script>
 {% endblock %}

@@ -125,8 +125,7 @@
             new_form_service();
         });
 
-        $('#form-tariffservice-rows').on('change', '.row-service .select', function (){
-            let service = $(this);
+        let select_unit = function (service){
             $.ajax({
                 type: "GET",
                 url: '{% url 'admin:get_unit_by_service' %}',
@@ -134,7 +133,19 @@
                  success: function(response) {
                     $(service).parents('.tariffservice-row').find('.unit-select').val(response);
                  }
-     })
-        })
+            });
+        }
+
+        $('#form-tariffservice-rows').on('change', '.row-service .select', function (){
+            let service = $(this);
+            select_unit(service);
+        });
+
+        {% if update is True %}
+            $('.row-service .select').each(function (index){
+                let service = $(this);
+                select_unit(service);
+            });
+        {% endif %}
     </script>
 {% endblock %}
