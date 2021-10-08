@@ -69,6 +69,7 @@ urlpatterns = [
     path('update_income/<int:cash_box_id>', views.update_cash_box_income, name='update_income'),
     path('create_expense', views.update_cash_box_expense, name='create_expense'),
     path('update_expense/<int:cash_box_id>', views.update_cash_box_expense, name='update_expense'),
+    path('export_cashbox', views.export_cashbox, name='export_cashbox'),
     path('detail_cashbox/<str:pk>', views.CashBoxDetail.as_view(), name='detail_cashbox'),
     path('delete_cashbox/<str:pk>', views.delete_cash_box, name='delete_cashbox'),
     path('receipt_list', views.ReceiptList.as_view(), name='receipt_list'),

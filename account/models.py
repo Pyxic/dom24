@@ -50,6 +50,10 @@ class Owner(models.Model):
 
     status = models.CharField("Статус", choices=Status.choices, max_length=20, default='новый')
 
+    @property
+    def fullnamep(self):
+        return f"{self.user.last_name} {self.user.first_name} {self.patronymic}"
+
     def fullname(self):
         return f"{self.user.last_name} {self.user.first_name} {self.patronymic}"
 

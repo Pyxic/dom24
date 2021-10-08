@@ -1,5 +1,6 @@
 import json
 
+import xlwt
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Group, User
@@ -8,6 +9,7 @@ from django.db.models import Sum
 from django.forms import modelformset_factory
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 
 # Create your views here.
 from django.urls import reverse_lazy
@@ -19,6 +21,7 @@ from django.views.generic.edit import FormMixin
 from account.forms import UserChangeForm, ProfileChangeForm, OwnerFilterForm
 from account.models import Profile, Owner
 from account.services.profile import has_access, has_access_for_class
+from admin.admin import CashBoxResource
 from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilterForm, FlatCounterFilterForm, \
     BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm, MasterRequestForm, \
     MessageForm, MasterRequestFilterForm, HouseFilterForm, ReceiptFilterForm
@@ -154,6 +157,7 @@ def settings_roles(request):
             for form in role:
                 if form.is_valid():
                     form.save()
+        messages.success(request, 'Права успешно изменены')
     return render(request, 'admin/settings/roles.html', {
         'forms': forms
     })
@@ -804,3 +808,42 @@ def delete_message(request):
     logger.info(request.POST)
     Message.objects.filter(id__in=request.POST.getlist('ids[]')).delete()
     return redirect('admin:message_list')
+
+
+def export_cashbox(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="cashbox.xls"'
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('sheet1')
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = ['#', 'Дата', 'Приход/расход', 'Статус', 'Статья', 'Сумма', 'Владелец квартиры', 'Лицевой счет']
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+        col = ws.col(col_num)
+        col.width = 256*(len(columns[col_num])+5)
+
+    font_style = xlwt.XFStyle()
+
+    rows = CashBox.objects.all().values_list('id', 'date', 'type', 'status', 'payment_type__name',
+                                             'amount_of_money', 'bankbook__flat__owner', 'bankbook')
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            if col_num == 6 and Owner.objects.filter(id=row[col_num]).exists():
+                owner = Owner.objects.get(id=row[col_num])
+                ws.write(row_num, col_num, owner.fullname(), font_style)
+                col = ws.col(col_num)
+                if col.width < 256 * len(owner.fullname()):
+                    col.width = 256 * (len(owner.fullname()) + 5)
+                continue
+            elif row[col_num] is None:
+                continue
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+            col = ws.col(col_num)
+            if col.width < 256 * len(str(row[col_num])):
+                col.width = 256 * (len(str(row[col_num]))+5)
+    wb.save(response)
+    return response
