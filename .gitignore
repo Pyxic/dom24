@@ -114,3 +114,4 @@ media/*
 *.pid
 admin/static/*!/.env.prod
 /.env.prod
+!/admin/static/dist
