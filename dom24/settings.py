@@ -84,12 +84,12 @@ WSGI_APPLICATION = 'dom24.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dom24',
-        'USER': 'postgres',
-        'PASSWORD': 'pass12345',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'ENGINE': os.environ.get("SQL_ENGINE", "django.db.backends.postgresql_psycopg2"),
+        'NAME': os.environ.get("SQL_DATABASE", 'dom24'),
+        'USER': os.environ.get("SQL_USER", "postgres"),
+        'PASSWORD': os.environ.get("SQL_PASSWORD", "pass12345"),
+        'HOST': os.environ.get("SQL_HOST", '127.0.0.1'),
+        'PORT': os.environ.get("SQL_PORT", '5432'),
     }
 }
 

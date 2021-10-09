@@ -112,4 +112,5 @@ media/*
 *.pyc
 *.db
 *.pid
-admin/static/*
+admin/static/*!/.env.prod
+/.env.prod
