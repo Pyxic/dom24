@@ -136,8 +136,12 @@ def render_pdf_view(request, receipt_id):
 class MyPDF(PDFTemplateView):
     filename = 'my_pdf.pdf'
     template_name = '/cabinet/receipt/pdf.html'
-    requisites = Requisites.objects.first()
-    context = {'requisites': requisites.information}
     cmd_options = {
         'margin-top': 3,
     }
+
+    def get_context_data(self, **kwargs):
+        context = super(MyPDF, self).get_context_data(**kwargs)
+        requisites = Requisites.objects.first()
+        context['requisites'] = requisites.information
+        return context
