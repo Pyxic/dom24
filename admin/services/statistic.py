@@ -60,7 +60,10 @@ def get_state_cashbox():
                    .get('amount_of_money__sum'))
     incomes = str(CashBox.objects.filter(type='приход').aggregate(Sum('amount_of_money')) \
                   .get('amount_of_money__sum'))
-    return float(incomes) - float(expenses)
+    try:
+        return float(incomes) - float(expenses)
+    except ValueError:
+        return None
 
 
 class StatisticMixin(MultipleObjectMixin):
