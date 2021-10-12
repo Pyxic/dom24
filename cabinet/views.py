@@ -32,10 +32,8 @@ logger = logging.getLogger(__name__)
 @login_required(login_url='account:login_owner')
 def index(request):
     if request.GET.get('admin'):
-        print('admin')
         owner_cabinet = OwnerCabinet(request)
         owner_cabinet.set_admin(request.GET.get('admin'))
-    print('session', request.session.get(settings.USERS_SESSION_ID))
     return render(request, 'cabinet/index.html')
 
 
