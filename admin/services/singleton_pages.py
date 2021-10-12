@@ -96,11 +96,14 @@ class MainPageData(SingletonData):
         form = self.form_model(post, files, instance=self.page)
         formset = self.model_formset(post, files,
                                      instance=self.page)
-        near_formset = self.near_model_formset(post)
+        near_formset = self.near_model_formset(post, files, prefix='near')
         if SeoText.objects.filter(id=self.page.seo_id).exists():
             seo_form = SeoCreateForm(post, prefix="seo", instance=SeoText.objects.get(id=self.page.seo_id))
         else:
             seo_form = SeoCreateForm(post, prefix="seo")
+        print(near_formset.errors)
+        print(formset.errors)
+        print(form.errors)
         if form.is_valid() and seo_form.is_valid() and formset.is_valid() and near_formset.is_valid():
             seo_instance = seo_form.save()
             created_page = form.save(commit=False)

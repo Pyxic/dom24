@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.forms import forms
@@ -8,6 +10,10 @@ from django.shortcuts import render, redirect
 from django.views import View
 from account.forms import LoginForm, LoginOwnerForm
 from account.models import Profile
+from account.services.owner import OwnerCabinet
+from dom24 import settings
+
+logger = logging.getLogger(__name__)
 
 
 class LoginView(View):
@@ -57,3 +63,13 @@ def get_user_role(request):
 def logout_user(request):
     logout(request)
     return redirect('account:login')
+
+
+def go_to_cabinet(request, owner_id, admin_id):
+    owner_cabinet = OwnerCabinet(request)
+    owner_cabinet.set_admin(admin_id)
+    owner_cabinet.set_owner(owner_id)
+    logger.info(owner_cabinet.users)
+    admin = owner_cabinet.users['admin']
+    owner_cabinet.login_owner(request)
+    return redirect(f'/cabinet/index?admin={admin}')

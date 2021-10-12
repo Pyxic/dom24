@@ -24,7 +24,7 @@
                 <div class="card">
                 <div class="card-header">
                     <div class="card-tools">
-                        <a href="" target="_blank" class="btn btn-default btn-sm"><i class="fas fa-external-link-alt"></i> Перейти в кабинет</a>
+                        <a href="{% url 'account:go_to_cabinet' owner.user_id request.user.id %}" target="_blank" class="btn btn-default btn-sm"><i class="fas fa-external-link-alt"></i> Перейти в кабинет</a>
                         <a href="{% url 'admin:update_owner' owner.user.id %}" class="btn btn-primary btn-sm">
                             <span class="hidden-xs">Редактировать профиль</span>
                         </a>

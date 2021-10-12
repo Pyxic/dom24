@@ -1,3 +1,4 @@
+import logging
 from os import path
 
 from django.contrib.auth.decorators import login_required
@@ -14,6 +15,7 @@ from django.views.generic.edit import FormMixin, CreateView
 from wkhtmltopdf.views import PDFTemplateView
 
 from account.models import Owner
+from account.services.owner import OwnerCabinet
 from admin.forms import ReceiptFilterForm, MasterRequestForm
 from admin.models import BankBook, Flat, Receipt, TariffService, Message, MasterRequest, Requisites
 from admin.services.cashbox import FilterMixin
@@ -24,9 +26,16 @@ from xhtml2pdf import pisa
 from cabinet.services.utils import fetch_pdf_resources, link_callback
 from dom24 import settings
 
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def index(request):
+    if request.GET.get('admin'):
+        print('admin')
+        owner_cabinet = OwnerCabinet(request)
+        owner_cabinet.set_admin(request.GET.get('admin'))
+    print('session', request.session.get(settings.USERS_SESSION_ID))
     return render(request, 'cabinet/index.html')
 
 

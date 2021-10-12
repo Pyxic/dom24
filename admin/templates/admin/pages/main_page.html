@@ -67,7 +67,8 @@
                                      {% for form in near_formset %}
                                          <div class="col-md-4">
                                              <h4>Блок </h4>
-                                             <img src="{{ form.image.value.url }}" alt="" class="img-responsive margin-bottom-15">
+                                             <img src="{% if form.image.value.url %}{{ MEDIA_URL }}{{ form.image.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" alt="" class="img-responsive margin-bottom-15 w-100">
+                                             {{ form.image|as_crispy_field }}
                                              {{ form.title|as_crispy_field }}
                                              {{ form.description|as_crispy_field }}
                                          <div class="formset_id">

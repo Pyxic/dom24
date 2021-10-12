@@ -85,6 +85,8 @@ class CustomerServiceForm(forms.ModelForm):
 
 
 class NearBlockForm(forms.ModelForm):
+    image = forms.ImageField(error_messages={'invalid': "Только изображения"}, widget=forms.FileInput,
+                              label="Рекомендуемый размер: (1000x600)")
     class Meta:
         model = NearBlock
         fields = '__all__'

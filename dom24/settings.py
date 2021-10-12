@@ -178,3 +178,5 @@ LOGGING = {
         },
     },
 }
+
+USERS_SESSION_ID = 'users'

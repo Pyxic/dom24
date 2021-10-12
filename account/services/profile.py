@@ -4,16 +4,26 @@ from django.http import HttpResponse
 
 import account
 from account import models
-from account.models import PermissionAccess
+from account.models import PermissionAccess, Profile
+from account.services.owner import OwnerCabinet
+from dom24 import settings
 
 
 def has_access(permission_page):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
+            if request.session.get(settings.USERS_SESSION_ID):
+                owner_cabinet = OwnerCabinet(request)
+                print(owner_cabinet.users['admin'])
+                owner_cabinet.login_admin(request)
+                # owner_cabinet.clear()
             user = User.objects.get(id=request.user.id)
-            if PermissionAccess.objects.filter(role=user.profile.role, page__name=permission_page, access=True).exists():
-                return view_func(request, *args, **kwargs)
-            else:
+            try:
+                if PermissionAccess.objects.filter(role=user.profile.role, page__name=permission_page, access=True).exists():
+                    return view_func(request, *args, **kwargs)
+                else:
+                    return HttpResponse('Доступ запрещен')
+            except Profile.DoesNotExist:
                 return HttpResponse('Доступ запрещен')
         return wrapper
     return decorator

@@ -33,8 +33,8 @@ class MainPage(SingletonModel):
 
 class NearBlock(models.Model):
     image = models.ImageField("Изображение", upload_to='near/%Y/%m/%d')
-    title = models.CharField(max_length=100)
-    description = models.TextField(max_length=300)
+    title = models.CharField("Заголовок блока", max_length=100)
+    description = models.TextField("Описание", max_length=300)
 
 
 class AboutUs(SingletonModel):
