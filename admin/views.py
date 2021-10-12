@@ -400,8 +400,11 @@ def get_owner(request):
         flat = Flat.objects.get(id=request.GET.get('flat'))
         bankbook = flat.bankbook_set.first()
         owner = Owner.objects.get(id=flat.owner_id)
-        response = {'id': owner.user_id, 'fullname': owner.fullname(), 'phone': owner.phone,
-                    'bankbook': bankbook.id, 'tariff': flat.tariff_id}
+        try:
+            response = {'id': owner.user_id, 'fullname': owner.fullname(), 'phone': owner.phone,
+                        'bankbook': bankbook.id, 'tariff': flat.tariff_id}
+        except AttributeError:
+            response = {'id': owner.user_id, 'fullname': owner.fullname(), 'phone': owner.phone}
         return JsonResponse(json.dumps({'owner': response}), safe=False)
 
 
