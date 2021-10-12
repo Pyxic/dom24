@@ -605,7 +605,7 @@ class BankbookDetail(UserPassesTestMixin, DetailView):
         return has_access_for_class(permission_page='Лицевые счета', user=current_user)
 
 
-class CashBoxList(UserPassesTestMixin, CashBoxMixin, FormMixin, FilterMixin, ListView):
+class CashBoxList(UserPassesTestMixin, CashBoxMixin, FormMixin, FilterMixin, StatisticMixin, ListView):
     model = CashBox
     template_name = 'admin/cash_box/index.html'
     form_class = CashBoxFilterForm
