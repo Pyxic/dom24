@@ -224,6 +224,7 @@ def settings_requisites(request):
     requisites_data = RequisitesPageData()
     if request.method == 'POST':
         requisites_data.save_data(request.POST)
+        messages.success(request, 'Реквизиты успешно сохранены')
         return redirect(f"admin:requisites")
     return render(request, requisites_data.render_url, requisites_data.get_content())
 
