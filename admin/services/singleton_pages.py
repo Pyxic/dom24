@@ -101,9 +101,6 @@ class MainPageData(SingletonData):
             seo_form = SeoCreateForm(post, prefix="seo", instance=SeoText.objects.get(id=self.page.seo_id))
         else:
             seo_form = SeoCreateForm(post, prefix="seo")
-        print(near_formset.errors)
-        print(formset.errors)
-        print(form.errors)
         if form.is_valid() and seo_form.is_valid() and formset.is_valid() and near_formset.is_valid():
             seo_instance = seo_form.save()
             created_page = form.save(commit=False)

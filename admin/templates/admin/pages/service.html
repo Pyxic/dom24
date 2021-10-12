@@ -41,7 +41,7 @@
                                     <div class="col-md-4">
                                     <h4>
                                         Услуга {{ form.prefix|to_int }}
-                                        <a href="" class="float-right text-red" data-confirm="Удалить?"><i class="fa fa-trash"></i></a>
+                                        <a href="{% if form.id.value %}{% url 'admin:delete_service_page' form.id.value %}{% endif %}" class="float-right text-red" data-confirm="Удалить?"><i class="fa fa-trash"></i></a>
                                     </h4>
                                     <img src="{% if form.image.value.url %}{{ MEDIA_URL }}{{ form.image.value.url }}{% else %}{% static 'dist/img/empty.jpg' %}{% endif %}" alt="" class="img-responsive mb-0">
                                     <div class="form-group formset_id">

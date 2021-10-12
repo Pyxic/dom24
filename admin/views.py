@@ -26,7 +26,7 @@ from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilte
     BankBookFilterForm, CashBoxFilterForm, CashBoxIncomeCreateForm, CashBoxExpenseCreateForm, MasterRequestForm, \
     MessageForm, MasterRequestFilterForm, HouseFilterForm, ReceiptFilterForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
-    Section, Level, Counter, BankBook, CashBox, Receipt, MasterRequest, Message
+    Section, Level, Counter, BankBook, CashBox, Receipt, MasterRequest, Message, ServicePage, CustomerService
 from admin.services.bankbook import BankbookData
 from admin.services.cashbox import CashBoxMixin, CashBoxData, FilterMixin
 from admin.services.counter import CounterData, filter_flat_counter
@@ -70,6 +70,12 @@ def singleton_page(request, page_name):
 def delete_from_gallery(request, image_id):
     Gallery.objects.get(id=image_id).delete()
     return JsonResponse({'image_id': image_id})
+
+
+@has_access(permission_page='Управление сайтом')
+def delete_service_page(request, service_id):
+    CustomerService.objects.filter(id=service_id).delete()
+    return redirect('admin:service_page', 'service_page')
 
 
 @has_access(permission_page='Услуги')
