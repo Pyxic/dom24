@@ -117,21 +117,21 @@
           <span class="info-box-icon bg-red"><i class="fa fa-money"></i></span>
           <div class="info-box-content">
               <span class="info-box-text">Задолженность по счетам, грн</span>
-              <span class="info-box-number">{{ statistic.sum_account_debts }}</span>
+              <span class="info-box-number">{{ statistic.sum_account_debts|floatformat:2 }}</span>
           </div>
       </div>
       <div class="info-box">
           <span class="info-box-icon bg-blue"><i class="fa fa-money"></i></span>
           <div class="info-box-content">
               <span class="info-box-text">Баланс по счетам, грн</span>
-              <span class="info-box-number">{{ statistic.sum_account_balance }}</span>
+              <span class="info-box-number">{{ statistic.sum_account_balance|floatformat:2 }}</span>
           </div>
       </div>
       <div class="info-box">
           <span class="info-box-icon bg-green"><i class="fa fa-money"></i></span>
           <div class="info-box-content">
               <span class="info-box-text">Состояние кассы, грн</span>
-              <span class="info-box-number">{{ statistic.state_cashbox }}</span>
+              <span class="info-box-number">{{ statistic.state_cashbox|floatformat:2 }}</span>
           </div>
       </div>
 <!--        <div class="info-box">

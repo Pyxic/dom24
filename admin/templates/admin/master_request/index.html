@@ -71,7 +71,7 @@
                             </thead>
                             <tbody>
                             {% for masterrequest in masterrequest_list %}
-                                <tr class="clickable-row" href="">
+                                <tr class="clickable-row" href="{% url 'admin:detail_master_request' masterrequest.id %}">
                                     <td>{{ masterrequest.id }}</td>
                                     <td>{{ masterrequest.date|ru_strftime:"dd.MM.YYYY" }} - {{ masterrequest.time }}</td>
                                     <td>{{ masterrequest.type }}</td>

@@ -82,6 +82,7 @@ urlpatterns = [
     path('master_request_list', views.MasterRequestList.as_view(), name='master_request_list'),
     path('create_master_request', views.MasterRequestCreate.as_view(), name='create_master_request'),
     path('update_master_request/<int:pk>', views.update_master_request, name='update_master_request'),
+    path('detail_master_request/<int:pk>', views.MasterRequestDetail.as_view(), name='detail_master_request'),
     path('delete_master_request/<str:pk>', views.delete_master_request, name='delete_master_request'),
     path('message_list', views.MessageList.as_view(), name='message_list'),
     path('create_message', views.MessageCreate.as_view(), name='create_message'),

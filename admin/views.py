@@ -756,6 +756,15 @@ class MasterRequestCreate(UserPassesTestMixin, CreateView):
         return has_access_for_class(permission_page='Заявки вызова мастера', user=current_user)
 
 
+class MasterRequestDetail(UserPassesTestMixin, DetailView):
+    model = MasterRequest
+    template_name = 'admin/master_request/detail.html'
+
+    def test_func(self):
+        current_user = User.objects.get(id=self.request.user.id)
+        return has_access_for_class(permission_page='Заявки вызова мастера', user=current_user)
+
+
 @has_access(permission_page='Заявки вызова мастера')
 def update_master_request(request, pk=None):
     master_request = MasterRequestData(pk)
