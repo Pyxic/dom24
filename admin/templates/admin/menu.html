@@ -1,0 +1,196 @@
+        {% if 'Статистика' in permissions %}
+        <li class="nav-item">
+            <a href="{% url 'admin:index' %}" class="nav-link">
+              <i class="nav-icon fas fa-chart-line"></i>
+              <p>
+                Статистика
+              </p>
+            </a>
+          </li>
+        {% endif %}
+{% if 'Касса' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:cashbox_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-dollar-sign"></i>
+              <p>
+                Касса
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Квитанции на оплату' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:receipt_list' %}" class="nav-link">
+              <i class="nav-icon far fa-image"></i>
+              <p>
+                Квитанции на оплату
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Лицевые счета' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:bankbook_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-columns"></i>
+              <p>
+                Лицевые счета
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Квартиры' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:flat_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-columns"></i>
+              <p>
+                Квартиры
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Владельцы квартир' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:owner_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-columns"></i>
+              <p>
+                Владельцы квартир
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Дома' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:house_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-columns"></i>
+              <p>
+                Дома
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Сообщения' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:message_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-columns"></i>
+              <p>
+                Сообщения
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Заявки вызова мастера' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:master_request_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-columns"></i>
+              <p>
+                Заявки вызова мастера
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Счетчики' in permissions %}
+          <li class="nav-item">
+            <a href="{% url 'admin:counter_list' %}" class="nav-link">
+              <i class="nav-icon fas fa-columns"></i>
+              <p>
+                Показания счетчиков
+              </p>
+            </a>
+          </li>
+{% endif %}
+{% if 'Управление сайтом' in permissions %}
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-envelope"></i>
+              <p>
+                Управление сайтом
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'admin:main_page' 'main_page'%}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Главная</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin:about_us_page' 'about_us_page'%}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>о нас</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin:service_page' 'service_page'%}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>услуги</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin:contact_page' 'contact_page'%}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>контакты</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+{% endif %}
+{% if 'Услуги' in permissions or 'Тарифы' in permissions or 'Роли' in permissions or 'Пользователи' in permissions or 'Платежные реквизиты' in permissions %}
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon far fa-envelope"></i>
+              <p>
+                Настройки системы
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+                {% if 'Касса' in permissions %}
+              <li class="nav-item">
+                <a href="{% url 'admin:edit_services'%}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Услуги</p>
+                </a>
+              </li>
+                {% endif %}
+            {% if 'Касса' in permissions %}
+              <li class="nav-item">
+                <a href="{% url 'admin:tariff_list' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Тарифы</p>
+                </a>
+              </li>
+            {% endif %}
+            {% if 'Касса' in permissions %}
+              <li class="nav-item">
+                <a href="{% url 'admin:roles' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Роли</p>
+                </a>
+              </li>
+            {% endif %}
+            {% if 'Касса' in permissions %}
+              <li class="nav-item">
+                <a href="{% url 'admin:user_list' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Пользователи</p>
+                </a>
+              </li>
+            {% endif %}
+            {% if 'Касса' in permissions %}
+              <li class="nav-item">
+                <a href="{% url 'admin:requisites' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Платежные реквизиты</p>
+                </a>
+              </li>
+            {% endif %}
+              <li class="nav-item">
+                <a href="{% url 'admin:payment_item_list' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Статьи платежей</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+{% endif %}
