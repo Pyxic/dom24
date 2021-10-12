@@ -13,7 +13,7 @@ from dom24 import settings
 def has_access(permission_page):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 return redirect('account:login')
             if request.session.get(settings.USERS_SESSION_ID):
                 owner_cabinet = OwnerCabinet(request)
