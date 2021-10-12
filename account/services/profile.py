@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 import account
 from account import models
@@ -12,9 +13,10 @@ from dom24 import settings
 def has_access(permission_page):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
+            if request.user.is_authenticated():
+                return redirect('account:login')
             if request.session.get(settings.USERS_SESSION_ID):
                 owner_cabinet = OwnerCabinet(request)
-                print(owner_cabinet.users['admin'])
                 owner_cabinet.login_admin(request)
                 # owner_cabinet.clear()
             user = User.objects.get(id=request.user.id)

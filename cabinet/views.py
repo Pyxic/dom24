@@ -29,7 +29,7 @@ from dom24 import settings
 logger = logging.getLogger(__name__)
 
 
-@login_required
+@login_required(login_url='account:login_owner')
 def index(request):
     if request.GET.get('admin'):
         print('admin')
