@@ -65,6 +65,7 @@ urlpatterns = [
     path('create_bankbook', views.update_bankbook, name='create_bankbook'),
     path('update_bankbook/<str:bankbook_id>', views.update_bankbook, name='update_bankbook'),
     path('detail_bankbook/<str:pk>', views.BankbookDetail.as_view(), name='detail_bankbook'),
+    path('export_bankbook', views.export_bankbook, name='export_bankbook'),
     path('cashbox_list', views.CashBoxList.as_view(), name='cashbox_list'),
     path('create_income', views.update_cash_box_income, name='create_income'),
     path('update_income/<int:cash_box_id>', views.update_cash_box_income, name='update_income'),

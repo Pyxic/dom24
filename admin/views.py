@@ -27,6 +27,7 @@ from admin.forms import SeoCreateForm, GalleryForm, FlatFilterForm, CounterFilte
     MessageForm, MasterRequestFilterForm, HouseFilterForm, ReceiptFilterForm
 from admin.models import SeoText, Gallery, Document, Service, Unit, Tariff, Requisites, PaymentItem, House, Flat, \
     Section, Level, Counter, BankBook, CashBox, Receipt, MasterRequest, Message, ServicePage, CustomerService
+from admin.services import utils
 from admin.services.bankbook import BankbookData
 from admin.services.cashbox import CashBoxMixin, CashBoxData, FilterMixin
 from admin.services.counter import CounterData, filter_flat_counter
@@ -839,11 +840,7 @@ def export_cashbox(request):
     font_style.font.bold = True
 
     columns = ['#', 'Дата', 'Приход/расход', 'Статус', 'Статья', 'Сумма', 'Владелец квартиры', 'Лицевой счет']
-    for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style)
-        col = ws.col(col_num)
-        col.width = 256*(len(columns[col_num])+5)
-
+    utils.write_columns(ws, columns, font_style, row_num)
     font_style = xlwt.XFStyle()
 
     rows = CashBox.objects.all().values_list('id', 'date', 'type', 'status', 'payment_type__name',
@@ -864,5 +861,40 @@ def export_cashbox(request):
             col = ws.col(col_num)
             if col.width < 256 * len(str(row[col_num])):
                 col.width = 256 * (len(str(row[col_num]))+5)
+    wb.save(response)
+    return response
+
+
+def export_bankbook(request):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="accounts.xls"'
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('sheet1')
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = ['Лицевой счет', 'Статус', 'Дом', 'Секция', 'Квартира', 'Владелец', 'Остаток']
+    utils.write_columns(ws, columns, font_style, row_num)
+    font_style = xlwt.XFStyle()
+
+    rows = BankBook.objects.all().values_list('id', 'status', 'flat__house__name', 'flat__house__section__name',
+                                              'flat__number', 'flat__owner')
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            if col_num == 5 and Owner.objects.filter(id=row[col_num]).exists():
+                owner = Owner.objects.get(id=row[col_num])
+                ws.write(row_num, col_num, owner.fullname(), font_style)
+                col = ws.col(col_num)
+                if col.width < 256 * len(owner.fullname()):
+                    col.width = 256 * (len(owner.fullname()) + 5)
+                continue
+            elif row[col_num] is None:
+                continue
+            ws.write(row_num, col_num, str(row[col_num]), font_style)
+            col = ws.col(col_num)
+            if col.width < 256 * len(str(row[col_num])):
+                col.width = 256 * (len(str(row[col_num])) + 5)
     wb.save(response)
     return response
