@@ -16,7 +16,7 @@
                 <img src="{{ page.image.url }}" alt="" class="w-100 margin-bottom-15">
             </div>
             <div class="col-md-9">
-                {{ page.description }}
+                {{ page.description|safe }}
             </div>
         </div>
     </div>
@@ -36,7 +36,7 @@
                     <div class="page-header">
                         <h1>{{ page.additional_title }}</h1>
                     </div>
-                {{ page.additional_description }}
+                {{ page.additional_description|safe }}
     </div>
 
     <div class="gallery g2">

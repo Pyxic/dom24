@@ -23,7 +23,7 @@
                 <div class="page-header">
                     <h3>{{ service.name }}</h3>
                 </div>
-                {{ service.description }}
+                {{ service.description|safe }}
             </div>
         </div>
     {% endfor %}
