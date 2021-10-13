@@ -24,8 +24,8 @@
                 <div class="card-header">
                     <h3 class="card-title">Просмотр квартиры</h3>
                     <div class="card-tools">
-                        <button class="btn btn-default btn-sm disabled" data-confirm="Лицевой счет неактивен"><i class="fa fa-dollar"></i>Принять платеж</button>
-                        <button class="btn btn-default btn-sm disabled" data-confirm="Лицевой счет неактивен"><i class="fa fa-files-o"></i> Оформить квитанцию</button>
+                        <a {% if flat.bankbook_set.first %}href="{% url 'admin:create_income' %}?bankbook_id={{ flat.bankbook_set.first.id }}"{% endif %} class="btn btn-default btn-sm {% if not flat.bankbook_set.first %}disabled{% endif %}" data-confirm="Лицевой счет неактивен"><i class="fa fa-dollar"></i>Принять платеж</a>
+                        <a {% if flat.bankbook_set.first %}href="{% url 'admin:create_receipt' %}?flat_id={{ flat.id }}"{% endif %} class="btn btn-default btn-sm {% if not flat.bankbook_set.first %}disabled{% endif %}" data-confirm="Лицевой счет неактивен"><i class="fa fa-files-o"></i> Оформить квитанцию</a>
                         <a href="{% url 'admin:update_flat' flat.id %}" class="btn btn-primary btn-sm">
                             <span class="hidden-xs">Редактировать квартиру</span>
                         </a>
