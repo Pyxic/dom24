@@ -79,7 +79,7 @@ class Owner(models.Model):
     def has_debt(self):
         flats = self.flat_set.all()
         for flat in flats:
-            if isinstance(flat.balance(), int) and flat.balance() < 0:
+            if isinstance(flat.balance(), float) and flat.balance() < 0:
                 return True
             else:
                 return False
