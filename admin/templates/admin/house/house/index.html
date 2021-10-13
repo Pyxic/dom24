@@ -76,6 +76,10 @@
 {% endblock %}
 {% block script %}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Дома")').parents('.nav-link').addClass('active');
+
     $('#id_name, #id_address').on('change', function (){
             console.log('change');
             $('#filter-form').submit();

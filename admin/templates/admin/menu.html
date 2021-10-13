@@ -21,7 +21,7 @@
 {% if 'Квитанции на оплату' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:receipt_list' %}" class="nav-link">
-              <i class="nav-icon far fa-image"></i>
+              <i class="nav-icon far fa-copy"></i>
               <p>
                 Квитанции на оплату
               </p>
@@ -31,7 +31,7 @@
 {% if 'Лицевые счета' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:bankbook_list' %}" class="nav-link">
-              <i class="nav-icon fas fa-columns"></i>
+              <i class="nav-icon fal fa-credit-card"></i>
               <p>
                 Лицевые счета
               </p>
@@ -41,7 +41,7 @@
 {% if 'Квартиры' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:flat_list' %}" class="nav-link">
-              <i class="nav-icon fas fa-columns"></i>
+              <i class="nav-icon fal fa-key"></i>
               <p>
                 Квартиры
               </p>
@@ -51,7 +51,7 @@
 {% if 'Владельцы квартир' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:owner_list' %}" class="nav-link">
-              <i class="nav-icon fas fa-columns"></i>
+              <i class="nav-icon fas fa-users"></i>
               <p>
                 Владельцы квартир
               </p>
@@ -61,7 +61,7 @@
 {% if 'Дома' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:house_list' %}" class="nav-link">
-              <i class="nav-icon fas fa-columns"></i>
+              <i class="nav-icon far fa-building"></i>
               <p>
                 Дома
               </p>
@@ -71,7 +71,7 @@
 {% if 'Сообщения' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:message_list' %}" class="nav-link">
-              <i class="nav-icon fas fa-columns"></i>
+              <i class="nav-icon far fa-envelope"></i>
               <p>
                 Сообщения
               </p>
@@ -81,7 +81,7 @@
 {% if 'Заявки вызова мастера' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:master_request_list' %}" class="nav-link">
-              <i class="nav-icon fas fa-columns"></i>
+              <i class="nav-icon fas fa-wrench"></i>
               <p>
                 Заявки вызова мастера
               </p>
@@ -91,7 +91,7 @@
 {% if 'Счетчики' in permissions %}
           <li class="nav-item">
             <a href="{% url 'admin:counter_list' %}" class="nav-link">
-              <i class="nav-icon fas fa-columns"></i>
+              <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Показания счетчиков
               </p>
@@ -101,7 +101,7 @@
 {% if 'Управление сайтом' in permissions %}
           <li class="nav-item">
             <a href="#" class="nav-link">
-              <i class="nav-icon far fa-envelope"></i>
+              <i class="nav-icon fas fa-desktop"></i>
               <p>
                 Управление сайтом
                 <i class="fas fa-angle-left right"></i>
@@ -138,7 +138,7 @@
 {% if 'Услуги' in permissions or 'Тарифы' in permissions or 'Роли' in permissions or 'Пользователи' in permissions or 'Платежные реквизиты' in permissions %}
           <li class="nav-item">
             <a href="#" class="nav-link">
-              <i class="nav-icon far fa-envelope"></i>
+              <i class="nav-icon fas fa-cogs"></i>
               <p>
                 Настройки системы
                 <i class="fas fa-angle-left right"></i>

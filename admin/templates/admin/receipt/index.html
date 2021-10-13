@@ -151,6 +151,10 @@
     <script src="{% static 'plugins/moment/moment-with-locales.min.js' %}"></script>
     <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Квитанции на оплату")').parents('.nav-link').addClass('active');
+
         $('#id_id, #id_status, #id_date_range, #id_flat__number, #id_flat__owner_id, #id_is_checked').on('change', function (){
             console.log('change');
             $('#filter-form').submit();

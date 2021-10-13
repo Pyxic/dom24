@@ -91,6 +91,10 @@
 {% endblock %}
 {% block script %}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Показания счетчиков")').parents('.nav-link').addClass('active');
+
         $('#id_flat__house_id, #id_section, #id_flat__number, #id_service').on('change', function (){
             console.log('change');
             $('#filter-form').submit();

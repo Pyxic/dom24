@@ -92,3 +92,10 @@
         </div>
 </section>
 {% endblock %}
+{% block script %}
+    <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Владельцы квартир")').parents('.nav-link').addClass('active');
+    </script>
+{% endblock %}

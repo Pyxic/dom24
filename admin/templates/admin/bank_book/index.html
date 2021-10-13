@@ -142,6 +142,10 @@
 {% endblock %}
 {% block script %}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Лицевые счета")').parents('.nav-link').addClass('active');
+
         $('#id_id, #id_flat__house_id, #id_section, #id_flat__number, #id_status, #id_flat__owner_id').on('change', function (){
             console.log('change');
             $('#filter-form').submit();

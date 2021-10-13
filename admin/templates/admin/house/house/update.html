@@ -230,6 +230,10 @@
 {% endblock %}
 {% block script %}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Дома")').parents('.nav-link').addClass('active');
+
     let new_form_section = function (){
             let total_forms = $('#id_section-TOTAL_FORMS').val();
             $('#id_section-TOTAL_FORMS').val(parseInt(total_forms)+1);

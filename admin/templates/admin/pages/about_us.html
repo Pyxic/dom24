@@ -167,6 +167,12 @@
 {% endblock %}
 {% block script%}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+
+        $('.nav-link').find('p:contains("Управление сайтом")').parents('.nav-link').addClass('active').parent().addClass('menu-is-opening menu-open');
+        $('.nav-link').find('p:contains("о нас")').parents('.nav-link').addClass('active');
+
         $('.additional-image').prop('checked', true);
         $('.additional-empty label, .main-empty label').remove();
         $('.additional-empty #id_admin-gallery-content_type-object_id-__prefix__-is_additional').prop('checked', true);

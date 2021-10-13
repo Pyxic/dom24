@@ -110,6 +110,10 @@
     <script src="{% static 'plugins/moment/moment.min.js' %}"></script>
     <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Владельцы квартир")').parents('.nav-link').addClass('active');
+
     $('#id_owner-birthday').datetimepicker({
         locale: 'ru',
         format: 'YYYY-MM-DD',

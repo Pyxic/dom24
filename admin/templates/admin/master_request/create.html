@@ -82,6 +82,10 @@
     <script src="{% static 'dist/js/section_flat.js' %}"></script>
 
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Заявки вызова мастера")').parents('.nav-link').addClass('active');
+
     let date = $('#id_date').daterangepicker({
     "singleDatePicker": true,
     "showDropdowns": true,

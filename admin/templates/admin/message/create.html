@@ -58,6 +58,8 @@
     <script src="{% static 'dist/js/section_flat.js' %}"></script>
     <script>
 
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Сообщения")').parents('.nav-link').addClass('active');
 
         $('#id_house').on('change', function(){
            let house = $(this).val();

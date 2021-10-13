@@ -77,6 +77,10 @@
     <script src="{% static 'plugins/moment/moment.min.js' %}"></script>
     <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Показания счетчиков")').parents('.nav-link').addClass('active');
+
     $('#id_date').daterangepicker({
     "singleDatePicker": true,
     "showDropdowns": true,

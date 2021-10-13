@@ -145,6 +145,10 @@
 {% endblock %}
 {% block script %}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Касса")').parents('.nav-link').addClass('active');
+
         $('#id_id, #id_flat__house_id, #id_section, #id_flat__number').on('change', function (){
             console.log('change');
             $('#filter-form').submit();

@@ -110,6 +110,10 @@
 {% endblock %}
 {% block script %}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Владельцы квартир")').parents('.nav-link').addClass('active');
+
         $(".sorting-table").DataTable({
           "responsive": true, "lengthChange": false, "autoWidth": false, "searching": false, "paging": false,
             "bInfo" : false,

@@ -78,6 +78,10 @@
 {% endblock %}
 {% block script %}
     <script>
+
+    $('.nav-link.active').removeClass('active');
+        $('.nav-link').find('p:contains("Сообщения")').parents('.nav-link').addClass('active');
+
     $('.delete-many').on('click', function (e){
             e.preventDefault();
             $('#delete-form').submit();

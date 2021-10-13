@@ -33,3 +33,11 @@
         </div>
     </section>
 {% endblock %}
+{% block script %}
+    <script>
+    $('.nav-link.active').removeClass('active');
+
+        $('.nav-link').find('p:contains("Настройки системы")').parents('.nav-link').addClass('active').parent().addClass('menu-is-opening menu-open');
+        $('.nav-link').find('p:contains("Платежные реквизиты")').parents('.nav-link').addClass('active');
+    </script>
+{% endblock %}
